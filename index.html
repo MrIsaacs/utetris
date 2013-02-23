@@ -15,9 +15,8 @@
     <script type="text/javascript" src="https://raw.github.com/MrIsaacs/utetris/master/assets/mootools-core-1.4.5-full-compat-yc.js"></script>
     <script type="text/javascript" src="https://raw.github.com/MrIsaacs/utetris/master/assets/uTetris-1.0.js"></script>
     <script type="text/javascript">
-      $(document).ready(function () {
-        $('#main_content').headsmart();
-        
+
+      window.addEvent('domready', function(){
         var tetris = new uTetris($('container'), $('preview'),{
         keypress: true
     });
