@@ -16,11 +16,9 @@
     <script type="text/javascript" src="https://raw.github.com/MrIsaacs/utetris/master/assets/uTetris-1.0.js"></script>
     <script type="text/javascript">
       $(document).ready(function () {
-        $('#main_content').headsmart()
-      })
-    </script>
-    <script type="text/javascript">
-      var tetris = new uTetris($('container'), $('preview'),{
+        $('#main_content').headsmart();
+        
+        var tetris = new uTetris($('container'), $('preview'),{
         keypress: true
     });
 
@@ -63,6 +61,7 @@
             this.pause();
         }
     }.bind(tetris));
+      });
     </script>
     <title>uTetris by MrIsaacs</title>
   </head>
