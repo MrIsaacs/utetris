@@ -63,6 +63,78 @@
     }.bind(tetris));
       });
     </script>
+    <style>
+      <style>
+            .cube {
+                background: #000000;
+            }
+            .bar {
+                background: #045bc8;
+            }
+            .zleft {
+                background: #6d9b00;
+            }
+            .t {
+                background: #c20016;
+            }
+            .zright {
+                background: blueviolet;
+            }
+            .lright {
+                background: grey;
+            }
+            .lleft {
+                background: gold;
+            }
+
+  		h1 {
+				font-size: 18px;
+			}
+			
+            #main {
+                overflow: hidden;
+				width: 530px;
+				margin: 0 auto;
+				padding-top: 15px;
+            }
+
+            #main > div {
+                float: left;
+                /*border: solid 1px;*/
+                margin-right: 20px;
+            }
+			.border {
+				border: solid 1px #000;
+				margin-top: 10px;
+			}
+            #main > div:first-child {
+                border: solid 1px;
+            }
+			
+			#right{
+				padding-top: 20px;
+			}
+			
+			#info {
+				font-size: 13px;
+			}
+			
+            .animate td {
+                transition: all 1s ease-out;
+                -moz-transition: all 1s ease-out;
+                -webkit-transition: all 1s ease-out;
+            }    
+            .animate.out td {
+                background: #CCC;
+            }
+			
+			#keysinfo {
+				font-size: 12px;
+				color: #666;
+				padding-top: 30px;
+				display: block;
+			}
+    </style>
     <title>uTetris by MrIsaacs</title>
   </head>
 
