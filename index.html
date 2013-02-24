@@ -10,11 +10,10 @@
     <link rel="stylesheet" href="stylesheets/pygment_trac.css"/>
 
     <script type="text/javascript" src="javascripts/modernizr.js"></script>
-    <script type="text/javascript" src="javascripts/headsmart.min.js"></script>
     <script type="text/javascript" src="https://raw.github.com/MrIsaacs/utetris/master/assets/mootools-core-1.4.5-full-compat-yc.js"></script>
     <script type="text/javascript" src="https://raw.github.com/MrIsaacs/utetris/master/assets/uTetris-1.0.js"></script>
     <script type="text/javascript">
-window.addEvent('load', function(){
+window.addEvent('domready', function(){
     var tetris = new uTetris($('container'), $('preview'),{
         keypress: true
     });
@@ -51,7 +50,7 @@ window.addEvent('load', function(){
         setLabel(pause ? "Resume" : "Pause");
     }
     
-    play.addEvent("click",function() {
+    play.addEvent("click", function() {
         if (this.isStop()) {
             this.restart();
         } else {
