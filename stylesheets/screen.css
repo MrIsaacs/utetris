@@ -462,9 +462,6 @@ table {
   background: #fff6e9;
   display: table;
   width: 100%;
-  border-collapse: separate;
-  border-bottom: 2px solid #bdb6ad;
-  margin: 10px 0;
 }
 
 tr {
@@ -484,9 +481,6 @@ th {
 
 td {
   display: table-cell;
-  padding: 0 .7em;
-  border: solid #ece4d8;
-  border-width: 0 2px 2px 0;
 }
 
 td:last-child, th:last-child {
