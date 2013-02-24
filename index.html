@@ -10,20 +10,19 @@
     <link rel="stylesheet" href="stylesheets/pygment_trac.css"/>
 
     <script type="text/javascript" src="javascripts/modernizr.js"></script>
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
     <script type="text/javascript" src="javascripts/headsmart.min.js"></script>
     <script type="text/javascript" src="https://raw.github.com/MrIsaacs/utetris/master/assets/mootools-core-1.4.5-full-compat-yc.js"></script>
     <script type="text/javascript" src="https://raw.github.com/MrIsaacs/utetris/master/assets/uTetris-1.0.js"></script>
     <script type="text/javascript">
 window.addEvent('load', function(){
-    var tetris = new uTetris($('#container')[0], $('#preview')[0],{
+    var tetris = new uTetris($('container'), $('preview'),{
         keypress: true
     });
     
-    var play = $("#play")[0], 
-    score = $("#score")[0], 
-    level = $("#level")[0], 
-    lines = $("#lines")[0];
+    var play = $("play"), 
+    score = $("score"), 
+    level = $("level"), 
+    lines = $("lines");
     
     tetris.addEvents({
         "start": function(e){
