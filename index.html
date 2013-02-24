@@ -16,7 +16,7 @@
     <script type="text/javascript" src="https://raw.github.com/MrIsaacs/utetris/master/assets/uTetris-1.0.js"></script>
     <script type="text/javascript">
 window.addEvent('load', function(){
-    var tetris = new uTetris($('container'), $('preview'),{
+    var tetris = new uTetris($('#container')[0], $('#preview')[0],{
         keypress: true
     });
     
