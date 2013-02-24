@@ -20,10 +20,10 @@ window.addEvent('load', function(){
         keypress: true
     });
     
-    var play = $("play"), 
-    score = $("score"), 
-    level = $("level"), 
-    lines = $("lines");
+    var play = $("#play")[0], 
+    score = $("#score")[0], 
+    level = $("#level")[0], 
+    lines = $("#lines")[0];
     
     tetris.addEvents({
         "start": function(e){
