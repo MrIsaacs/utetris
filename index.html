@@ -13,51 +13,51 @@
     <script type="text/javascript" src="https://raw.github.com/MrIsaacs/utetris/master/assets/mootools-core-1.4.5-full-compat-yc.js"></script>
     <script type="text/javascript" src="https://raw.github.com/MrIsaacs/utetris/master/assets/uTetris-1.0.js"></script>
     <script type="text/javascript">
-window.addEvent('domready', function(){
-    var tetris = new uTetris($('container'), $('preview'),{
-        keypress: true
-    });
-    
-    var play = $("play"), 
-    score = $("score"), 
-    level = $("level"), 
-    lines = $("lines");
-    
-    tetris.addEvents({
-        "start": function(e){
-            setInfo(e);
-            setPause();
-        },
-        "lines": setInfo,
-        "fixed": setInfo,
-        "pause": setPause,
-        "gameover": function(){
-            play.set("html", "Play");
-        }
-    });
-    
-    function setLabel(str) {
-        play.set("html", str);
-    }
-    
-    function setInfo(obj) {
-        level.set("html", "Level: " + obj.level || 0);
-        score.set("html", "Score: " + obj.score || 0);
-        lines.set("html", "Lines: " + obj.lines || 0);
-    }
-    
-    function setPause(pause) {
-        setLabel(pause ? "Resume" : "Pause");
-    }
-    
-    play.addEvent("click", function() {
-        if (this.isStop()) {
-            this.restart();
-        } else {
-            this.pause();
-        }
-    }.bind(tetris));
-});
+	window.addEvent('domready', function(){
+	    var tetris = new uTetris($('container'), $('preview'),{
+	        keypress: true
+	    });
+	    
+	    var play = $("play"), 
+	    score = $("score"), 
+	    level = $("level"), 
+	    lines = $("lines");
+	    
+	    tetris.addEvents({
+	        "start": function(e){
+	            setInfo(e);
+	            setPause();
+	        },
+	        "lines": setInfo,
+	        "fixed": setInfo,
+	        "pause": setPause,
+	        "gameover": function(){
+	            play.set("html", "Play");
+	        }
+	    });
+	    
+	    function setLabel(str) {
+	        play.set("html", str);
+	    }
+	    
+	    function setInfo(obj) {
+	        level.set("html", "Level: " + obj.level || 0);
+	        score.set("html", "Score: " + obj.score || 0);
+	        lines.set("html", "Lines: " + obj.lines || 0);
+	    }
+	    
+	    function setPause(pause) {
+	        setLabel(pause ? "Resume" : "Pause");
+	    }
+	    
+	    play.addEvent("click", function() {
+	        if (this.isStop()) {
+	            this.restart();
+	        } else {
+	            this.pause();
+	        }
+	    }.bind(tetris));
+	});
     </script>
       <style>
             .cube {
@@ -165,7 +165,7 @@ window.addEvent('domready', function(){
                 <div id="lines">Lines: 0</div>
             </div>
 
-            <div class="border" style="width: 98px; height: 98px;">
+            <div class="border">
                 <table id="preview"></table>
             </div>
 
