@@ -162,7 +162,7 @@ window.uTetris = new Class({
                 case 40:
                     this.down();
                     break;
-                case 38:
+                case 32:
                     this.drop();
             }
         }
