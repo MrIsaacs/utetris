@@ -14,7 +14,7 @@ provides: uTetris
 */
 
 window.uTetris = new Class({
-    version: '1.0',
+    version: '1.0.1',
     
     Implements: [Events, Options],
     
@@ -156,12 +156,14 @@ window.uTetris = new Class({
                 case 39:
                     this.right();
                     break;
-                case 32:
+                case 38:
                     this.rotate();
                     break;
                 case 40:
                     this.down();
                     break;
+                case 38:
+                    this.drop();
             }
         }
         
@@ -240,6 +242,21 @@ window.uTetris = new Class({
                     this.renderStage();
                 }
                 
+                this._isdown = false;
+            }
+        }
+    },
+    drop: function() {
+        if (!this.isAnimate && !this._gameover && !this._pause && !this._win) {
+            if (this.move) {
+                this._isdown = true;
+
+                while (this.validForm(this.x, (this.y+1), this.pos)) {
+                    this.del(true);
+                    this.y++;
+                }
+                this.renderStage();
+
                 this._isdown = false;
             }
         }
