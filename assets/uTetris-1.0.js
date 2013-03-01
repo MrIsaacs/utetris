@@ -39,6 +39,7 @@ window.uTetris = new Class({
     current_line: 0,
     brickclass: '',
     brickclass_preview: '',
+    shadow: [],
     first_step: true,
     
     options: {
@@ -49,6 +50,7 @@ window.uTetris = new Class({
         score_increase: 200,
         score_top: 1000000,
         number_lines: 10,
+        shadow: true,
         aX: 10,
         aY: 15,
         box_width: "20px",
@@ -401,7 +403,10 @@ window.uTetris = new Class({
         if (!this.validForm(this.x, (this.y + (this._isdown ? 2 : 1)), this.pos)) {
             this.score += this.current_lines;
         }
-        
+
+        if (this.options.shadow) {
+          this.renderShadow();
+        }
         this.renderPreview();
     },
     renderPreview: function() {
@@ -414,6 +419,21 @@ window.uTetris = new Class({
         
         for (n = 0; n <= 3; n++) {
             this.getPreviewBrick(1 + this.forms[this.nForm][0][0][n], 1 + this.forms[this.nForm][0][1][n]).addClass(this.brickclass_preview);
+        }
+    },
+    renderShadow: function() {
+        this.shadow.x	= this.x;
+        this.shadow.y	= this.y;
+        this.shadow.pos	= this.pos;
+
+        this.brickclass = this.options.brick_classes[this.form].name;
+
+        while (this.validForm(this.shadow.x, (this.shadow.y+1), this.shadow.pos)) {
+          this.shadow.y++;
+        }
+
+        for (var n = 0; n <= 3; n++) {
+          this.getStageBrick(this.shadow.x + this.shadow.pos[0][n], this.shadow.y + this.shadow.pos[1][n]).addClass(this.brickclass);
         }
     },
     getPreviewBrick: function(x,y) {
@@ -450,12 +470,23 @@ window.uTetris = new Class({
         return true;
     },
     del: function(down) {
+        if (this.options.shadow) {
+            this.clearShadow();
+        }
+
         this.current_lines = down ? this.current_lines + 1 : 0;
         
         for (var n = 0; n <= 3; n++) {
             this.getStageBrick(this.lX + this.pos[0][n], this.lY + this.pos[1][n]).set('class','');
         }
     },
+    clearShadow: function() {
+        if (this.shadow.x) {
+            for (var n = 0; n <= 3; n++) {
+                this.getStageBrick(this.shadow.x + this.shadow.pos[0][n], this.shadow.y + this.shadow.pos[1][n]).set('class','');
+            }
+		    }
+		},
     isValid: function(x, y){
         if (y > (this.options.aY-1) || x > (this.options.aX-1) || x < 0 || y < 0 || this.isUsed(x, y)) {
             return false;
@@ -480,6 +511,10 @@ window.uTetris = new Class({
         
         return true;
     },
+    /*
+     * Checks each line if each block is used and pushes the line
+     * to 'lines'.
+     */
     checkLines: function() {
         var lines = [];
         
@@ -561,7 +596,7 @@ window.uTetris = new Class({
             
             this.isAnimate = false;
             this.timeline();
-        }.bind(this)).delay(sec * 1000);    
+        }.bind(this)).delay(sec);    
     },
     deleteLine: function(y) {
         for (var x = 0; x <= (this.options.aX-1); x++) {
