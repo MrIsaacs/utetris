@@ -1,0 +1,27 @@
+# States
+
+window.NRBLOCK = 6
+#number of starting blocks
+window.STATIC = 0
+window.HANG   = 1
+window.FALL   = 2
+window.SWAP   = 3
+window.CLEAR  = 4
+# Animation states
+window.ANIM_SWAP_LEFT  = 0
+window.ANIM_SWAP_RIGHT = 1
+window.ANIM_LAND       = 2
+window.ANIM_CLEAR      = 4
+# Timing
+window.HANGTIME         = 11
+window.FALLTIME         = 4
+window.SWAPTIME         = 4
+window.CLEARBLINKTIME   = 44
+window.CLEARPAUSETIME   = 23
+window.CLEAREXPLODETIME = 9
+window.PUSHTIME         = 1000
+# Animation timing
+window.ANIM_SWAPTIME       = 4
+window.ANIM_LANDTIME       = 0
+window.ANIM_CLEARBLINKTIME = 15
+window.ANIM_DANGERTIME     = 6
