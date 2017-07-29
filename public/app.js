@@ -104725,7 +104725,6 @@ PIXI.TextureSilentFail = true;
     };
 
     Cursor.prototype.mv_swap = function() {
-      console.log('mv swap');
       return this.playfield.swap(this.x, this.y);
     };
 
@@ -104785,7 +104784,7 @@ PIXI.TextureSilentFail = true;
       this.create_bg = bind(this.create_bg, this);
     }
 
-    Playfield.unit = null;
+    Playfield.prototype.unit = null;
 
     Playfield.prototype.rows = null;
 
@@ -104853,7 +104852,8 @@ PIXI.TextureSilentFail = true;
       this.score = 0;
       this.score_lbl = new Component.Score();
       this.score_lbl.create();
-      this.wall = new Component.Panel(null, null, null, true);
+      this.wall = new Component.Panel();
+      this.wall.create(this, null, null, true);
       this.update_neighbors();
       this.render();
     };
@@ -104986,10 +104986,9 @@ PIXI.TextureSilentFail = true;
     };
 
     Playfield.prototype.swap = function(x, y) {
-      if (!this.stack[x][y].is_swappable() || !this.stack[x + 1][y].is_swappable()) {
-        return;
+      if (this.stack[x][y].is_swappable() || this.stack[x + 1][y].is_swappable()) {
+        return this.stack[x][y].swap();
       }
-      this.stack[x][y].swap();
     };
 
     Playfield.prototype.chainOver = function() {
@@ -105182,31 +105181,31 @@ PIXI.TextureSilentFail = true;
       this.create = bind(this.create, this);
     }
 
-    Panel.playfield = null;
+    Panel.prototype.playfield = null;
 
-    Panel.x = null;
+    Panel.prototype.x = null;
 
-    Panel.y = null;
+    Panel.prototype.y = null;
 
-    Panel.state = null;
+    Panel.prototype.state = null;
 
-    Panel.above = null;
+    Panel.prototype.above = null;
 
-    Panel.under = null;
+    Panel.prototype.under = null;
 
-    Panel.left = null;
+    Panel.prototype.left = null;
 
-    Panel.right = null;
+    Panel.prototype.right = null;
 
-    Panel.counter = 0;
+    Panel.prototype.counter = 0;
 
-    Panel.animation_state = null;
+    Panel.prototype.animation_state = null;
 
-    Panel.animation_counter = 0;
+    Panel.prototype.animation_counter = 0;
 
-    Panel.chain = null;
+    Panel.prototype.chain = null;
 
-    Panel.sprite = null;
+    Panel.prototype.sprite = null;
 
     Panel.prototype.create = function(playfield, x, y, wall) {
       this.playfield = playfield;
@@ -105218,12 +105217,11 @@ PIXI.TextureSilentFail = true;
       this.state = STATIC;
       this.chain = false;
       if (wall) {
-        return this.set_wall(this.playfield);
+        return this.set_wall();
       }
     };
 
-    Panel.prototype.set_wall = function(playfield) {
-      this.playfield = playfield;
+    Panel.prototype.set_wall = function() {
       this.x = null;
       this.y = null;
       this.under = this;
@@ -105233,7 +105231,7 @@ PIXI.TextureSilentFail = true;
       this.state = STATIC;
       this.counter = 0;
       this.animation_state = null;
-      this.animation_counter = 0;
+      return this.animation_counter = 0;
     };
 
     Panel.prototype.is_support = function() {
@@ -105358,7 +105356,6 @@ PIXI.TextureSilentFail = true;
             step = this.playfield.unit / ANIM_SWAPTIME;
             return this.sprite.x += step * this.animation_counter;
           case ANIM_SWAP_RIGHT:
-            step = this.playfield.unit / ANIM_SWAPTIME;
             return this.sprite.x -= step * this.animation_counter;
         }
       }

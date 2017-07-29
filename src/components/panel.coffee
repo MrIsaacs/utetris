@@ -1,28 +1,28 @@
 class window.Component.Panel
-  @playfield         : null
-  @x                 : null
-  @y                 : null
-  @state             : null
-  @above             : null
-  @under             : null
-  @left              : null
-  @right             : null
-  @counter           : 0
-  @animation_state   : null
-  @animation_counter : 0
-  @chain             : null
-  @sprite            : null
+  playfield         : null
+  x                 : null
+  y                 : null
+  state             : null
+  above             : null
+  under             : null
+  left              : null
+  right             : null
+  counter           : 0
+  animation_state   : null
+  animation_counter : 0
+  chain             : null
+  sprite            : null
 
   create:(@playfield, @x, @y, wall=false)=>
     @state = STATIC
     @chain = false
-    @set_wall @playfield if wall
+    @set_wall() if wall
 
   # A wall block will see itself as its neighbors.
   # It is never supposed to have a sprite and should always have a state
   # of STATIC.
   # The wall is used on the outer edges of the grid.
-  set_wall:(@playfield)=>
+  set_wall:=>
     @x                 = null
     @y                 = null
     @under             = this
@@ -33,8 +33,6 @@ class window.Component.Panel
     @counter           = 0
     @animation_state   = null
     @animation_counter = 0
-    return
-
 
   # if stops other panels from falling.
   is_support:=>   @state != FALL and (@sprite != null or @playfield.wall is @)
@@ -136,7 +134,6 @@ class window.Component.Panel
           step = @playfield.unit / ANIM_SWAPTIME
           @sprite.x += step * @animation_counter
         when ANIM_SWAP_RIGHT
-          step = @playfield.unit / ANIM_SWAPTIME
           @sprite.x -= step * @animation_counter
         #when ANIM_CLEAR, ANIM_LAND
   # This block will give its state and sprite to the block under it and then

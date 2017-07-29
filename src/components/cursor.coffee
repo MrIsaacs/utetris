@@ -35,9 +35,7 @@ class window.Component.Cursor
     diff = (@playfield.unit / 16) * 3
     @sprite.x = @x * @playfield.unit - diff
     @sprite.y = @playfield.cols * @playfield.unit - ((@y + 1) * @playfield.unit) - diff
-  mv_swap:=>
-    console.log 'mv swap'
-    @playfield.swap @x, @y
+  mv_swap:=>          @playfield.swap @x, @y
   mv_left:=>          @x-- if @x > 0
   mv_right:(cursor)=> @x++ if @x < @playfield.rows - 2
   mv_down:(cursor)=>  @y-- if @y > 0

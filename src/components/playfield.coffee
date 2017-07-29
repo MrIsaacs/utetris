@@ -4,7 +4,7 @@
 ###
 
 class window.Component.Playfield
-  @unit      : null
+  unit       : null
   rows       : null
   cols       : null
   nr_blocks  : null
@@ -66,7 +66,8 @@ class window.Component.Playfield
     @score_lbl = new Component.Score()
     @score_lbl.create()
 
-    @wall = new Component.Panel null,null,null,true
+    @wall = new Component.Panel()
+    @wall.create @, null, null, true
     @update_neighbors()
     @render()
     return
@@ -155,10 +156,9 @@ class window.Component.Playfield
     [combo, chain]
   # Swaps two blocks at location (x,y) and (x+1,y) if swapping is possible
   swap:(x, y)=>
-    if !@stack[x][y].is_swappable() or !@stack[x + 1][y].is_swappable()
-      return
-    @stack[x][y].swap()
-    return
+    if @stack[x][y].is_swappable() ||
+       @stack[x+1][y].is_swappable()
+      @stack[x][y].swap()
 
   # Checks if the current chain is over.
   # returns a boolean
