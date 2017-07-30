@@ -104771,6 +104771,7 @@ PIXI.TextureSilentFail = true;
     function Playfield() {
       this.update_newline = bind(this.update_newline, this);
       this.update_stack = bind(this.update_stack, this);
+      this.score_current = bind(this.score_current, this);
       this.chainOver = bind(this.chainOver, this);
       this.swap = bind(this.swap, this);
       this.updateCnc = bind(this.updateCnc, this);
@@ -105108,6 +105109,11 @@ PIXI.TextureSilentFail = true;
           this.chain = 0;
         }
       }
+      this.score_current(cnc);
+      this.render();
+    };
+
+    Playfield.prototype.score_current = function(cnc) {
       if (cnc[0] > 0) {
         console.log('combo is ', cnc);
         this.score += cnc[0] * 10;
@@ -105119,9 +105125,8 @@ PIXI.TextureSilentFail = true;
         if (this.chain) {
           this.score += this.chainToScore(this.chain + 1);
         }
-        console.log('Score: ', this.score);
+        return console.log('Score: ', this.score);
       }
-      this.render();
     };
 
     Playfield.prototype.update_stack = function() {
@@ -105480,9 +105485,10 @@ PIXI.TextureSilentFail = true;
 
     Score.prototype.create = function() {
       this.lbl = game.add.text(0, 0, '0', {
-        fontSize: '10px',
-        fill: '#fff'
+        fontSize: '32px',
+        fill: 0x000000
       });
+      rsto(this.lbl);
       this.lbl.setTextBounds(50, 0, 46, 32);
       this.lbl.boundsAlignH = 'right';
       this.lbl.align = 'right';
@@ -105495,7 +105501,8 @@ PIXI.TextureSilentFail = true;
       if (chain) {
         text += '\nchain: ' + chain + 1;
       }
-      return this.lbl = text;
+      console.log('text', text);
+      return this.lbl.setText(text);
     };
 
     return Score;

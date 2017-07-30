@@ -1,8 +1,9 @@
 class window.Component.Score
   create:=>
     @lbl = game.add.text 0, 0, '0',
-      fontSize: '10px'
-      fill: '#fff'
+      fontSize: '32px'
+      fill: 0x000000
+    rsto @lbl
     @lbl.setTextBounds 50, 0, 46, 32
     @lbl.boundsAlignH = 'right'
     @lbl.align        = 'right'
@@ -11,4 +12,5 @@ class window.Component.Score
   update:(chain,score)=>
     text  = '' + score
     text += '\nchain: ' + chain + 1 if chain
-    @lbl = text
+    console.log 'text', text
+    @lbl.setText text
