@@ -236,6 +236,11 @@ class window.Component.Playfield
         @chain = 0
 
     # Calculate the current score
+    # spawn garbage
+    @score_current cnc
+    @render()
+    return
+  score_current:(cnc)=>
     if cnc[0] > 0
       console.log 'combo is ', cnc
       @score += cnc[0] * 10
@@ -246,10 +251,6 @@ class window.Component.Playfield
       if @chain
         @score += @chainToScore(@chain + 1)
       console.log 'Score: ', @score
-    # spawn garbage
-    @render()
-    return
-
   # Updates the coordinates of the sprite objects to the corresponding
   # coordinates in the grid. Then copies the entire grid to an upscaled
   # canvas to maintain pixelart.
