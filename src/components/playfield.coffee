@@ -19,7 +19,6 @@ class window.Component.Playfield
   scoreText  : null
   pushTime   : 0
   pushCounter: 0
-
   create_cover:=>
     @g = game.add.graphics @x, @y+(@unit*(@cols+1))
     @g.clear()
@@ -92,13 +91,13 @@ class window.Component.Playfield
         blocks[x][y + 1] = @stack[x][y]
       @stack[x][@cols - 1].erase()
       blocks[x][0] = @newline[x][0]
-      blocks[x][0].sprite.animations.play 'live'
+      blocks[x][0].play_live()
     @stack   = blocks
     @newline = @new_blocks 6, 1
     @fill_blocks @newline, 6, 1
 
     for x in [0...@rows]
-      @newline[x][0].sprite.animations.play 'dead'
+      @newline[x][0].play_dead()
     @cursor.y++ if @cursor.y < @cols - 1
     1
 
@@ -107,11 +106,11 @@ class window.Component.Playfield
     for x in [0...@rows]
       for y in [0...@cols]
         if @stack[x][y].sprite
-          @stack[x][y].sprite.animations.play 'face'
+          @stack[x][y].play_face()
         @tick = ->
-          console.log 'game over bitch'
+          console.log 'Game Over'
           return
-      @newline[x][0].sprite.animations.play 'face'
+      @newline[x][0].play_face()
     @pushCounter = 0
     return
   #grid of blocks
@@ -129,14 +128,14 @@ class window.Component.Playfield
         stack[x][y].set()
   # Updates the neighbor references in each block in the grid.
   update_neighbors:=>
-    block = undefined
+    panel = undefined
     for x in [0...@rows]
       for y in [0...@cols]
-        block = @stack[x][y]
-        block.left  = if x > 0         then @stack[x - 1][y] else @wall
-        block.right = if x < @rows - 1 then @stack[x + 1][y] else @wall
-        block.under = if y > 0         then @stack[x][y - 1] else @wall
-        block.above = if y < @cols - 1 then @stack[x][y + 1] else @wall
+        panel = @stack[x][y]
+        panel.left  = if x > 0         then @stack[x - 1][y] else @wall
+        panel.right = if x < @rows - 1 then @stack[x + 1][y] else @wall
+        panel.under = if y > 0         then @stack[x][y - 1] else @wall
+        panel.above = if y < @cols - 1 then @stack[x][y + 1] else @wall
 
   # Updates the state of the grid.
   # Blocks are only dependent on the state of their under-neighbor, so
@@ -151,21 +150,20 @@ class window.Component.Playfield
   # Returns [combo, chain] where
   # combo is the amount of blocks participating in the combo
   # chain is whether a chain is currently happening.
-  updateCnc:=>
+  update_chain_and_combo:=>
     combo = 0
     chain = false
     for x in [0...@rows]
       for y in [0...@cols]
-        cnc = @stack[x][y].chain_and_combo()
-        combo += cnc[0]
-        chain = true if cnc[1]
+        do (x,y)=>
+          cnc = @stack[x][y].chain_and_combo()
+          combo += cnc[0]
+          chain = true if cnc[1]
     [combo, chain]
   # Swaps two blocks at location (x,y) and (x+1,y) if swapping is possible
   swap:(x, y)=>
-    if @stack[x][y].is_swappable() ||
-       @stack[x+1][y].is_swappable()
+    if @stack[x][y].is_swappable() && @stack[x+1][y].is_swappable()
       @stack[x][y].swap()
-
   # Checks if the current chain is over.
   # returns a boolean
   chainOver:=>
@@ -209,7 +207,7 @@ class window.Component.Playfield
   # cols is the distance to the top.
   is_danger:(cols)->
     for x in [0...@rows]
-      return true if @stack[x][@cols-1].sprite
+      return true if @stack[x][@cols-1].i != null
     false
 
   ### The tick function is the main function of the TaGame object.
@@ -231,7 +229,7 @@ class window.Component.Playfield
     @update_neighbors()
     @update_state()
     # combo n chain
-    cnc = @updateCnc()
+    cnc = @update_chain_and_combo()
     if @chain
       if @chainOver()
         console.log 'chain over'
@@ -269,5 +267,6 @@ class window.Component.Playfield
     @cursor.update()
     @score_lbl.update @chain, @score
 
-    @layer_block.y  = @y + (@pushCounter / @pushTime * @unit)
-    @layer_cursor.y = @y + (@pushCounter / @pushTime * @unit)
+    lift = @y + (@pushCounter / @pushTime * @unit)
+    @layer_block.y  = lift
+    @layer_cursor.y = lift

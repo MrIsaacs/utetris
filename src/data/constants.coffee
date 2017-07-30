@@ -1,6 +1,6 @@
 # States
 
-window.NRBLOCK = 6
+window.NRBLOCK = 17
 #number of starting blocks
 window.STATIC = 0
 window.HANG   = 1

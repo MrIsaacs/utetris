@@ -40,14 +40,8 @@ class controller
     #game.load.audio 'sizzle'   , './sizzle.mp3'
     #game.load.image 'splash', './splash.png'
     #game.load.image 'titlescreen', './titlescreen.jpg'
-    game.load.spritesheet 'cursor', './cursor.png'      , 38, 22, 2
-
-    game.load.spritesheet 'block0', './block_blue.png'  , 16, 16, 8
-    game.load.spritesheet 'block1', './block_yellow.png', 16, 16, 8
-    game.load.spritesheet 'block2', './block_green.png' , 16, 16, 8
-    game.load.spritesheet 'block3', './block_purple.png', 16, 16, 8
-    game.load.spritesheet 'block4', './block_red.png'   , 16, 16, 8
-    game.load.spritesheet 'block5', './block_via.png'   , 16, 16, 8
+    game.load.spritesheet 'cursor', './cursor.png'  , 38, 22, 2
+    game.load.spritesheet 'panels', './panels.png'  , 16, 16, 136
 
     game.load.start()
 ctrl = new controller()
