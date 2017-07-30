@@ -20,6 +20,12 @@ class window.Component.Playfield
   pushTime   : 0
   pushCounter: 0
 
+  create_cover:=>
+    @g = game.add.graphics @x, @y+(@unit*(@cols+1))
+    @g.clear()
+    @g.beginFill 0xFFFFFF, 1
+    @g.drawRect 0, 0, @width, @unit*2
+    @g.endFill()
   create_bg:=>
     @g = game.add.graphics @x, @y
     @g.clear()
@@ -28,7 +34,7 @@ class window.Component.Playfield
     @g.endFill()
   create:(@rows, @cols, @nr_blocks)=>
     @unit = (game.stage.height * 0.8) / @cols
-    @height = @cols * @unit
+    @height = (@cols+1) * @unit
     @width  = @rows * @unit
 
     @x = (game.stage.width   / 2) - (@width  / 2)
@@ -50,9 +56,6 @@ class window.Component.Playfield
     @fill_blocks @stack  , 6, 4
     @fill_blocks @newline, 6, 1
 
-    console.log 'stack' ,@stack
-
-
     @command   = null
 
     @cursor = new Component.Cursor()
@@ -68,6 +71,9 @@ class window.Component.Playfield
 
     @wall = new Component.Panel()
     @wall.create @, null, null, true
+
+    @create_cover()
+
     @update_neighbors()
     @render()
     return
@@ -76,8 +82,8 @@ class window.Component.Playfield
   # up. If there is not enough room a the top, the game will game-over.
   # Returns 1 if succesfull.
   push:=>
-    if @is_danger(1)
-      @gameOver()
+    if @is_danger()
+      @game_over()
       return 0
     blocks = @new_blocks @rows, @cols
 
@@ -88,7 +94,7 @@ class window.Component.Playfield
       blocks[x][0] = @newline[x][0]
       blocks[x][0].sprite.animations.play 'live'
     @stack   = blocks
-    @newline = @new_blocks(6, 1)
+    @newline = @new_blocks 6, 1
     @fill_blocks @newline, 6, 1
 
     for x in [0...@rows]
@@ -97,7 +103,7 @@ class window.Component.Playfield
     1
 
   # Ends the current game.
-  gameOver:=>
+  game_over:=>
     for x in [0...@rows]
       for y in [0...@cols]
         if @stack[x][y].sprite
@@ -201,13 +207,9 @@ class window.Component.Playfield
 
   #Checks if any block sprites are close to the top of the grid.
   # cols is the distance to the top.
-  # returns a boolean
   is_danger:(cols)->
     for x in [0...@rows]
-      y = @cols - 1
-      while y > @cols - 1 - cols
-        return true if @stack[x][y].sprite
-        y--
+      return true if @stack[x][@cols-1].sprite
     false
 
   ### The tick function is the main function of the TaGame object.
@@ -267,5 +269,5 @@ class window.Component.Playfield
     @cursor.update()
     @score_lbl.update @chain, @score
 
-    @layer_block.y  = @pushCounter / @pushTime * @unit
-    @layer_cursor.y = @pushCounter / @pushTime * @unit
+    @layer_block.y  = @y + (@pushCounter / @pushTime * @unit)
+    @layer_cursor.y = @y + (@pushCounter / @pushTime * @unit)

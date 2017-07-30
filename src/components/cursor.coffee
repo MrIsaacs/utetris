@@ -33,7 +33,7 @@ class window.Component.Cursor
     @controls.swap.onDown.add  @mv_swap , @
   update:=>
     diff = (@playfield.unit / 16) * 3
-    @sprite.x = @x * @playfield.unit - diff
+    @sprite.x = (@x * @playfield.unit) - diff
     @sprite.y = @playfield.cols * @playfield.unit - ((@y + 1) * @playfield.unit) - diff
   mv_swap:=>          @playfield.swap @x, @y
   mv_left:=>          @x-- if @x > 0

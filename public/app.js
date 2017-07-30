@@ -104720,7 +104720,7 @@ PIXI.TextureSilentFail = true;
     Cursor.prototype.update = function() {
       var diff;
       diff = (this.playfield.unit / 16) * 3;
-      this.sprite.x = this.x * this.playfield.unit - diff;
+      this.sprite.x = (this.x * this.playfield.unit) - diff;
       return this.sprite.y = this.playfield.cols * this.playfield.unit - ((this.y + 1) * this.playfield.unit) - diff;
     };
 
@@ -104778,10 +104778,11 @@ PIXI.TextureSilentFail = true;
       this.update_neighbors = bind(this.update_neighbors, this);
       this.fill_blocks = bind(this.fill_blocks, this);
       this.new_blocks = bind(this.new_blocks, this);
-      this.gameOver = bind(this.gameOver, this);
+      this.game_over = bind(this.game_over, this);
       this.push = bind(this.push, this);
       this.create = bind(this.create, this);
       this.create_bg = bind(this.create_bg, this);
+      this.create_cover = bind(this.create_cover, this);
     }
 
     Playfield.prototype.unit = null;
@@ -104814,6 +104815,14 @@ PIXI.TextureSilentFail = true;
 
     Playfield.prototype.pushCounter = 0;
 
+    Playfield.prototype.create_cover = function() {
+      this.g = game.add.graphics(this.x, this.y + (this.unit * (this.cols + 1)));
+      this.g.clear();
+      this.g.beginFill(0xFFFFFF, 1);
+      this.g.drawRect(0, 0, this.width, this.unit * 2);
+      return this.g.endFill();
+    };
+
     Playfield.prototype.create_bg = function() {
       this.g = game.add.graphics(this.x, this.y);
       this.g.clear();
@@ -104827,7 +104836,7 @@ PIXI.TextureSilentFail = true;
       this.cols = cols1;
       this.nr_blocks = nr_blocks;
       this.unit = (game.stage.height * 0.8) / this.cols;
-      this.height = this.cols * this.unit;
+      this.height = (this.cols + 1) * this.unit;
       this.width = this.rows * this.unit;
       this.x = (game.stage.width / 2) - (this.width / 2);
       this.y = (game.stage.height / 2) - (this.height / 2);
@@ -104842,7 +104851,6 @@ PIXI.TextureSilentFail = true;
       this.newline = this.new_blocks(6, 1);
       this.fill_blocks(this.stack, 6, 4);
       this.fill_blocks(this.newline, 6, 1);
-      console.log('stack', this.stack);
       this.command = null;
       this.cursor = new Component.Cursor();
       this.cursor.create(this);
@@ -104854,14 +104862,15 @@ PIXI.TextureSilentFail = true;
       this.score_lbl.create();
       this.wall = new Component.Panel();
       this.wall.create(this, null, null, true);
+      this.create_cover();
       this.update_neighbors();
       this.render();
     };
 
     Playfield.prototype.push = function() {
       var blocks, i, j, k, ref, ref1, ref2, x, y;
-      if (this.is_danger(1)) {
-        this.gameOver();
+      if (this.is_danger()) {
+        this.game_over();
         return 0;
       }
       blocks = this.new_blocks(this.rows, this.cols);
@@ -104885,7 +104894,7 @@ PIXI.TextureSilentFail = true;
       return 1;
     };
 
-    Playfield.prototype.gameOver = function() {
+    Playfield.prototype.game_over = function() {
       var i, j, ref, ref1, x, y;
       for (x = i = 0, ref = this.rows; 0 <= ref ? i < ref : i > ref; x = 0 <= ref ? ++i : --i) {
         for (y = j = 0, ref1 = this.cols; 0 <= ref1 ? j < ref1 : j > ref1; y = 0 <= ref1 ? ++j : --j) {
@@ -105061,14 +105070,10 @@ PIXI.TextureSilentFail = true;
     };
 
     Playfield.prototype.is_danger = function(cols) {
-      var i, ref, x, y;
+      var i, ref, x;
       for (x = i = 0, ref = this.rows; 0 <= ref ? i < ref : i > ref; x = 0 <= ref ? ++i : --i) {
-        y = this.cols - 1;
-        while (y > this.cols - 1 - cols) {
-          if (this.stack[x][y].sprite) {
-            return true;
-          }
-          y--;
+        if (this.stack[x][this.cols - 1].sprite) {
+          return true;
         }
       }
       return false;
@@ -105149,8 +105154,8 @@ PIXI.TextureSilentFail = true;
       this.update_newline();
       this.cursor.update();
       this.score_lbl.update(this.chain, this.score);
-      this.layer_block.y = this.pushCounter / this.pushTime * this.unit;
-      return this.layer_cursor.y = this.pushCounter / this.pushTime * this.unit;
+      this.layer_block.y = this.y + (this.pushCounter / this.pushTime * this.unit);
+      return this.layer_cursor.y = this.y + (this.pushCounter / this.pushTime * this.unit);
     };
 
     return Playfield;
