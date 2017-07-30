@@ -104665,6 +104665,31 @@ PIXI.TextureSilentFail = true;
 (function() {
   var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
+  window.Component.Ai = (function() {
+    function Ai() {
+      this.update = bind(this.update, this);
+      this.create = bind(this.create, this);
+    }
+
+    Ai.prototype.create = function(playfield, cursor) {
+      this.playfield = playfield;
+      this.cursor = cursor;
+      return console.log('create ai');
+    };
+
+    Ai.prototype.update = function() {
+      return this.cursor.mv_up();
+    };
+
+    return Ai;
+
+  })();
+
+}).call(this);
+
+(function() {
+  var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
   window.Component.Cursor = (function() {
     function Cursor() {
       this.mv_up = bind(this.mv_up, this);
@@ -104691,8 +104716,12 @@ PIXI.TextureSilentFail = true;
 
     Cursor.prototype.controls = null;
 
-    Cursor.prototype.create = function(playfield) {
+    Cursor.prototype.create = function(playfield, opts) {
       this.playfield = playfield;
+      if (opts == null) {
+        opts = {};
+      }
+      this.ai = opts.ai || false;
       this.x = Math.floor(this.playfield.rows / 2) - 1;
       this.y = Math.floor(this.playfield.cols / 3);
       this.left = this.playfield.stack[this.x][this.y];
@@ -104703,7 +104732,9 @@ PIXI.TextureSilentFail = true;
       this.sprite.animations.add('idle', [0, 1]);
       this.sprite.animations.play('idle', Math.round(game.time.desiredFps / 10), true);
       this.playfield.layer_cursor.add(this.sprite);
-      return this.create_controls();
+      if (!this.ai) {
+        return this.create_controls();
+      }
     };
 
     Cursor.prototype.create_controls = function() {
@@ -104772,10 +104803,12 @@ PIXI.TextureSilentFail = true;
       this.update_newline = bind(this.update_newline, this);
       this.update_stack = bind(this.update_stack, this);
       this.score_current = bind(this.score_current, this);
+      this.tick = bind(this.tick, this);
+      this.tick_push = bind(this.tick_push, this);
       this.chainOver = bind(this.chainOver, this);
       this.swap = bind(this.swap, this);
       this.update_chain_and_combo = bind(this.update_chain_and_combo, this);
-      this.update_state = bind(this.update_state, this);
+      this.update_panels_state = bind(this.update_panels_state, this);
       this.update_neighbors = bind(this.update_neighbors, this);
       this.fill_blocks = bind(this.fill_blocks, this);
       this.new_blocks = bind(this.new_blocks, this);
@@ -104854,7 +104887,11 @@ PIXI.TextureSilentFail = true;
       this.fill_blocks(this.newline, 6, 1);
       this.command = null;
       this.cursor = new Component.Cursor();
-      this.cursor.create(this);
+      this.cursor.create(this, {
+        ai: true
+      });
+      this.ai = new Component.Ai();
+      this.ai.create(this.playfield, this.cursor);
       this.chain = 0;
       this.pushTime = PUSHTIME;
       this.pushCounter = this.pushTime;
@@ -104961,7 +104998,7 @@ PIXI.TextureSilentFail = true;
       return results;
     };
 
-    Playfield.prototype.update_state = function() {
+    Playfield.prototype.update_panels_state = function() {
       var i, ref, results, x, y;
       results = [];
       for (x = i = 0, ref = this.rows; 0 <= ref ? i < ref : i > ref; x = 0 <= ref ? ++i : --i) {
@@ -105095,19 +105132,24 @@ PIXI.TextureSilentFail = true;
      * updates the sprites to the correct locations in the canvas.
      */
 
-    Playfield.prototype.tick = function() {
-      var cnc;
-      if (this.cursor.controls.push.isDown) {
+    Playfield.prototype.tick_push = function() {
+      if (this.cursor.controls && this.cursor.controls.push.isDown) {
         this.pushCounter -= 100;
       } else {
         this.pushCounter--;
       }
       if (this.pushCounter <= 0) {
         this.pushCounter = this.pushTime;
-        this.score += this.push();
+        return this.score += this.push();
       }
+    };
+
+    Playfield.prototype.tick = function() {
+      var cnc;
+      this.tick_push();
       this.update_neighbors();
-      this.update_state();
+      this.update_panels_state();
+      this.ai.update();
       cnc = this.update_chain_and_combo();
       if (this.chain) {
         if (this.chainOver()) {
@@ -105541,10 +105583,11 @@ PIXI.TextureSilentFail = true;
     }
 
     Score.prototype.create = function() {
-      this.lbl = game.add.text(0, 0, '0', {
+      this.lbl = game.add.text(100, 100, '0', {
         fontSize: '32px',
         fill: 0x000000
       });
+      this.lbl.y = 200;
       rsto(this.lbl);
       this.lbl.setTextBounds(50, 0, 46, 32);
       this.lbl.boundsAlignH = 'right';
@@ -105558,7 +105601,6 @@ PIXI.TextureSilentFail = true;
       if (chain) {
         text += '\nchain: ' + chain + 1;
       }
-      console.log('text', text);
       return this.lbl.setText(text);
     };
 

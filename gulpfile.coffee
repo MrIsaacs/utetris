@@ -18,6 +18,8 @@ js_app = [
   './src/core/rez.coffee'
   './src/data/constants.coffee'
 
+  './src/components/ai.coffee'
+
   './src/components/cursor.coffee'
   './src/components/playfield.coffee'
   './src/components/panel.coffee'

@@ -6,8 +6,10 @@ class window.Component.Cursor
   sprite     : null
   game       : null
   controls   : null
-  create:(@playfield)=>
+  create:(@playfield,opts={})=>
     # center the cursor
+    @ai = opts.ai || false
+
     @x = Math.floor(@playfield.rows / 2) - 1
     @y = Math.floor(@playfield.cols / 3)
 
@@ -21,7 +23,7 @@ class window.Component.Cursor
     @sprite.animations.play 'idle', Math.round(game.time.desiredFps / 10), true
 
     @playfield.layer_cursor.add @sprite
-    @create_controls()
+    @create_controls() unless @ai
   create_controls:=>
     @controls      = game.input.keyboard.createCursorKeys()
     @controls.swap = game.input.keyboard.addKey Phaser.Keyboard.X

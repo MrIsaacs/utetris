@@ -58,7 +58,10 @@ class window.Component.Playfield
     @command   = null
 
     @cursor = new Component.Cursor()
-    @cursor.create @
+    @cursor.create @, ai: true
+
+    @ai = new Component.Ai()
+    @ai.create @playfield, @cursor
 
     @chain = 0
     @pushTime = PUSHTIME
@@ -140,7 +143,7 @@ class window.Component.Playfield
   # Updates the state of the grid.
   # Blocks are only dependent on the state of their under-neighbor, so
   # this can be done from the bottom up.
-  update_state:=>
+  update_panels_state:=>
     for x in [0...@rows]
       for y in [0...@cols]
         @stack[x][y].update_state()
@@ -217,17 +220,19 @@ class window.Component.Playfield
   # spawn possible garbage,
   # updates the sprites to the correct locations in the canvas.
   ###
-
-  tick:->
-    if @cursor.controls.push.isDown
+  tick_push:=>
+    if @cursor.controls && @cursor.controls.push.isDown
       @pushCounter -= 100
     else
       @pushCounter--
     if @pushCounter <= 0
       @pushCounter = @pushTime
-      @score += @push()
+      @score      += @push()
+  tick:=>
+    @tick_push()
     @update_neighbors()
-    @update_state()
+    @update_panels_state()
+    @ai.update()
     # combo n chain
     cnc = @update_chain_and_combo()
     if @chain
@@ -235,8 +240,6 @@ class window.Component.Playfield
         console.log 'chain over'
         @chain = 0
 
-    # Calculate the current score
-    # spawn garbage
     @score_current cnc
     @render()
     return
@@ -251,9 +254,6 @@ class window.Component.Playfield
       if @chain
         @score += @chainToScore(@chain + 1)
       console.log 'Score: ', @score
-  # Updates the coordinates of the sprite objects to the corresponding
-  # coordinates in the grid. Then copies the entire grid to an upscaled
-  # canvas to maintain pixelart.
   update_stack:=>
     for x in [0...@rows]
       for y in [0...@cols]

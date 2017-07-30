@@ -214,10 +214,6 @@ class window.Component.Panel
     @state   = CLEAR
     @play_clear()
     [1, @chain]
-  # Combos and Chains the current block with its neighbours.
-  # returns [combo, chain] where
-  # combo is an int represeting the nr of blocks participating in the combo.
-  # chain is a boolean telling if this combo is part of a chain.
   chain_and_combo:=>
     combo = 0
     chain = false
