@@ -162,8 +162,7 @@ class window.Component.Playfield
     [combo, chain]
   # Swaps two blocks at location (x,y) and (x+1,y) if swapping is possible
   swap:(x, y)=>
-    if @stack[x][y].is_swappable() ||
-       @stack[x+1][y].is_swappable()
+    if @stack[x][y].is_swappable() && @stack[x+1][y].is_swappable()
       @stack[x][y].swap()
 
   # Checks if the current chain is over.

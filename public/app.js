@@ -104995,7 +104995,7 @@ PIXI.TextureSilentFail = true;
     };
 
     Playfield.prototype.swap = function(x, y) {
-      if (this.stack[x][y].is_swappable() || this.stack[x + 1][y].is_swappable()) {
+      if (this.stack[x][y].is_swappable() && this.stack[x + 1][y].is_swappable()) {
         return this.stack[x][y].swap();
       }
     };
