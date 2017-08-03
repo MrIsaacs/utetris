@@ -45,16 +45,19 @@ class window.Component.Panel
   is_support:=>   @state != FALL and (@i != null or @playfield.blank is @)
   is_clearable:=> @is_swappable() and @under.is_support() and @i != null
   is_comboable:=> @is_clearable() or @state is CLEAR and @counter is CLEARBLINKTIME
+  is_empty:=>     @counter is 0 and @i is null and @ != @playfield.blank
   matched:(i)=>
-    left  = @playfield.panel_i @x-1, @y
-    right = @playfield.panel_i @x+1, @y
-    under = @playfield.panel_i @x  , @y-1
-    above = @playfield.panel_i @x  , @y+1
+    pos = _f.xy_2_i @x, @y
 
-    left2  = @playfield.panel_i @x-2, @y
-    right2 = @playfield.panel_i @x+2, @y
-    under2 = @playfield.panel_i @x  , @y-2
-    above2 = @playfield.panel_i @x  , @y+2
+    left  = @playfield.panel_i pos-1
+    right = @playfield.panel_i pos+1
+    under = @playfield.panel_i pos+(1*COLS)
+    above = @playfield.panel_i pos-(1*COLS)
+
+    left2  = @playfield.panel_i pos-2
+    right2 = @playfield.panel_i pos+2
+    under2 = @playfield.panel_i pos+(2*COLS)
+    above2 = @playfield.panel_i pos-(2*COLS)
 
     (left  is i && right  is i) ||
     (above is i && under  is i) ||
@@ -62,7 +65,6 @@ class window.Component.Panel
     (under is i && under2 is i) ||
     (left  is i && left2  is i) ||
     (right is i && right2 is i)
-  is_empty:=>     @counter is 0 and @i is null and @ != @playfield.blank
   # Whether this block can be swapped or not.
   # Blocks can be swapped as long as no counter is running.
   # Blocks cannot be swapped underneath a block about to fall from hang
@@ -86,7 +88,6 @@ class window.Component.Panel
                                       @frame(6),@frame(0),@frame(6),@frame(0),
                                       @frame(6),@frame(0),@frame(5)]
     @sprite.animations.add 'live'  , [@frame(0)]
-    @sprite.animations.add 'dead'  , [@frame(1)]
     @sprite.animations.add 'danger', [@frame(0),@frame(4),@frame(0),@frame(3),@frame(2),@frame(3)]
     @sprite.animations.add 'face'  , [@frame(5)]
   set:(i)=>
@@ -156,10 +157,10 @@ class window.Component.Panel
     return unless @sprite
     @sprite.x = @x * @playfield.unit
     if newline
-      @sprite.y = COLS * @playfield.unit
+      @sprite.y = ROWS * @playfield.unit
     else
-      y = if @playfield.should_push then @y+1 else @y
-      @sprite.y = COLS * @playfield.unit - ((y) * @playfield.unit)
+      y = if @playfield.should_push then @y else @y+1
+      @sprite.y = y * @playfield.unit
       @animation_state = null if @animation_counter <= 0
       @animation_counter--    if @animation_counter > 0
       switch @animation_state

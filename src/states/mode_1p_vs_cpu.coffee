@@ -3,7 +3,8 @@ class controller
     @playfield = new Component.Playfield()
   create:=>
     game.stage.backgroundColor = 0xFFFFFF
-    @playfield.create 6, 12, NRBLOCK
+    @playfield.create
+      push: true
   update:=>
     @playfield.tick()
     @playfield.render()

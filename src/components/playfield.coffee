@@ -20,7 +20,7 @@ class window.Component.Playfield
   pushCounter: 0
   has_ai: false
   create_cover:=>
-    @g = game.add.graphics @x, @y+(@unit*(COLS+1))
+    @g = game.add.graphics @x, @y+(@unit*(ROWS+1))
     @g.clear()
     @g.beginFill 0xFFFFFF, 1
     @g.drawRect 0, 0, @width, @unit*2
@@ -33,9 +33,9 @@ class window.Component.Playfield
     @g.endFill()
   create:(opts={})=>
     @should_push = opts.push || false
-    @unit   = (game.stage.height * 0.8) / COLS
-    @height = (COLS+1) * @unit
-    @width  = ROWS     * @unit
+    @unit   = (game.stage.height * 0.8) / ROWS
+    @height = (ROWS+1) * @unit
+    @width  = COLS     * @unit
 
     @x = (game.stage.width   / 2) - (@width  / 2)
     @y = (game.stage.height  / 2) - (@height / 2)
@@ -50,12 +50,10 @@ class window.Component.Playfield
     @layer_cursor.x = @x
     @layer_cursor.y = @y
 
-    @stack    = @new_blocks ROWS, COLS
-    @newline  = @new_blocks 6, 1 if @should_push
+    @stack = @new_panels ROWS
+    @fill_panels @stack  , 4, 'unique'
 
-    @fill_blocks @stack  , 6, 4, 'unique'
-    @fill_blocks @newline, 6, 1, 'unique' if @should_push
-    @newline_dead() if @should_push
+    @create_newline 'unique'
 
     @command   = null
 
@@ -81,13 +79,14 @@ class window.Component.Playfield
     @create_cover()
 
     @update_neighbors()
+
     @render()
     return
 
   #darkens newline
   newline_dead:=>
-    for x in [0...ROWS]
-      @newline[x][0].play_dead()
+    for panel in @newline
+      panel.play_dead()
   # Adds a new line of blocks to the bottom of the grid and pushes the rest
   # up. If there is not enough room a the top, the game will game-over.
   # Returns 1 if succesfull.
@@ -95,72 +94,72 @@ class window.Component.Playfield
     if @is_danger()
       @game_over()
       return 0
-    blocks = @new_blocks ROWS, COLS
+    stack = new Array PANELS
+    for i in [COLS...PANELS]
+      stack[i-COLS] = @stack[i]
 
-    for x in [0...ROWS]
-      for y in [0...COLS-1]
-        blocks[x][y + 1] = @stack[x][y]
-      @stack[x][COLS - 1].erase()
-      blocks[x][0] = @newline[x][0]
-      blocks[x][0].play_live()
-    @stack   = blocks
+    for panel,i in @newline
+      ii = (PANELS-COLS)+i
+      stack[ii] = panel
+      stack[ii].play_live()
 
-    @newline = @new_blocks 6, 1, 'random'
-    @fill_blocks @newline, 6, 1, 'random'
+    @stack = stack
+    @create_newline 'random'
 
-    @newline_dead()
-    @cursor.y++ if @cursor.y < COLS - 1
+    @cursor.y-- if @cursor.y > 1
     1
 
+  create_newline:(mode)=>
+    return unless @should_push
+    @newline = @new_panels 1, mode
+    @fill_panels @newline, 1, mode
+    @newline_dead()
   # Ends the current game.
   game_over:=>
-    for x in [0...ROWS]
-      for y in [0...COLS]
-        if @stack[x][y].sprite
-          @stack[x][y].play_face()
-        @tick = ->
-          console.log 'Game Over'
-          return
-      @newline[x][0].play_face()
+    for i in [0...PANELS]
+      @stack[i].play_face()
+      @tick = ->
+        console.log 'Game Over'
+        return
+    for i in [0...COLS]
+      @newline[i].play_face()
     @pushCounter = 0
     return
   #grid of blocks
-  new_blocks:(rows, cols)=>
-    panels = new Array rows
-    for x in [0...rows]
-      panels[x] = new Array(cols)
-      for y in [0...cols]
-        panels[x][y] = new Component.Panel()
-        panels[x][y].create @, x, y
+  new_panels:(rows)=>
+    size   = COLS * rows
+    panels = new Array size
+    for i in [0...size]
+      [x,y] = _f.i_2_xy i
+      panels[i] = new Component.Panel()
+      panels[i].create @, x, y
     panels
-  fill_blocks:(stack, rows, cols, mode=null)=>
-    for x in [0...rows]
-      for y in [0...cols]
-        switch mode
-          when 'unique' then stack[x][y].set 'unique'
-          when 'random' then stack[x][y].set 'random'
-          else
-            stack[x][y].set mode[x][y]
+  fill_panels:(stack, rows, mode=null)=>
+    offset = ((stack.length / COLS) - rows) * COLS
+
+    size = rows * COLS
+    for i in [offset...offset+size]
+      switch mode
+        when 'unique' then stack[i].set 'unique'
+        when 'random' then stack[i].set 'random'
+        else
+          stack[i].set mode[i]
   # Updates the neighbor references in each block in the grid.
   update_neighbors:=>
-    panel = undefined
-    for x in [0...ROWS]
-      for y in [0...COLS]
-        panel = @stack[x][y]
-        panel.left  = if x > 0         then @stack[x - 1][y] else @blank
-        panel.right = if x < ROWS - 1 then @stack[x + 1][y] else @blank
-        panel.under = if y > 0         then @stack[x][y - 1] else @blank
-        panel.above = if y < COLS - 1 then @stack[x][y + 1] else @blank
-
+    for panel,i in @stack
+      panel.left  = if ((i+1) % COLS) is 1  then @blank else @stack[i-1]
+      panel.right = if ((i+1) % COLS) is 0  then @blank else @stack[i+1]
+      panel.under = if i+1 >= (PANELS-COLS) then @blank else @stack[i+COLS]
+      panel.above = if i+1 <= COLS          then @blank else @stack[i-COLS]
   # Updates the state of the grid.
   # Blocks are only dependent on the state of their under-neighbor, so
   # this can be done from the bottom up.
   update_panels_state:=>
-    for x in [0...ROWS]
-      for y in [0...COLS]
-        @stack[x][y].update_state()
-        @stack[x][y].x = x
-        @stack[x][y].y = y
+    for panel,i in @stack
+      [x,y] = _f.i_2_xy(i)
+      panel.update_state()
+      panel.x = x
+      panel.y = y
   # Update the combos and chain for the entire grid.
   # Returns [combo, chain] where
   # combo is the amount of blocks participating in the combo
@@ -168,24 +167,22 @@ class window.Component.Playfield
   update_chain_and_combo:=>
     combo = 0
     chain = false
-    for x in [0...ROWS]
-      for y in [0...COLS]
-        do (x,y)=>
-          cnc = @stack[x][y].chain_and_combo()
-          combo += cnc[0]
-          chain = true if cnc[1]
+    for panel,i in @stack
+      cnc = panel.chain_and_combo()
+      combo += cnc[0]
+      chain = true if cnc[1]
     [combo, chain]
   # Swaps two blocks at location (x,y) and (x+1,y) if swapping is possible
   swap:(x, y)=>
-    if @stack[x][y].is_swappable() && @stack[x+1][y].is_swappable()
-      @stack[x][y].swap()
+    i = _f.xy_2_i x, y
+    if @stack[i].is_swappable() && @stack[i+1].is_swappable()
+      @stack[i].swap()
   # Checks if the current chain is over.
   # returns a boolean
   chainOver:=>
     chain = true
-    for x in [0...ROWS]
-      for y in [0...COLS]
-        chain = false if @stack[x][y].chain
+    for panel in @stack
+      chain = false if panel.chain
     chain
 
   comboToScore:(combo)->
@@ -221,8 +218,8 @@ class window.Component.Playfield
   #Checks if any block sprites are close to the top of the grid.
   # cols is the distance to the top.
   is_danger:(cols)->
-    for x in [0...ROWS]
-      return true if @stack[x][COLS-1].i != null
+    for i in [0...COLS]
+      return true if @stack[i].i != null
     false
 
   ### The tick function is the main function of the TaGame object.
@@ -267,15 +264,14 @@ class window.Component.Playfield
         @score += @chainToScore(@chain + 1)
       console.log 'Score: ', @score
   update_stack:=>
-    for x in [0...ROWS]
-      for y in [0...COLS]
-        @stack[x][y].render()
+    for panel in @stack
+      panel.render()
   update_newline:=>
-    for x in [0...ROWS]
-      @newline[x][0].render true
-  panel_i:(x,y)=>
-    if @stack[x] && @stack[x][y] && @stack[x][y].i != null
-      @stack[x][y].i
+    for panel in @newline
+      panel.render true
+  panel_i:(i)=>
+    if @stack[i] && @stack[i].i != null
+      @stack[i].i
     else
       null
   render:->

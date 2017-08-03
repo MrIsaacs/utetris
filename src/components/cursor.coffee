@@ -11,11 +11,12 @@ class window.Component.Cursor
     @ai = opts.ai || false
     console.log 'ai', @ai
 
-    @x = Math.floor(ROWS / 2) - 1
-    @y = Math.floor(COLS / 3)
+    @x = Math.floor(COLS / 2) - 1
+    @y = Math.floor(ROWS / 3)
 
-    @left  = @playfield.stack[@x][@y]
-    @right = @playfield.stack[@x + 1][@y]
+    i = _f.xy_2_i @x, @y
+    @left  = @playfield.stack[i]
+    @right = @playfield.stack[i+1]
 
     @sprite = game.make.sprite 0, 0, 'cursor', 0
     @sprite.scale.setTo  (@playfield.unit / 16)
@@ -37,11 +38,11 @@ class window.Component.Cursor
     @controls.swap.onDown.add  @mv_swap , @
   update:=>
     diff = (@playfield.unit / 16) * 3
-    y = if @playfield.should_push then @y+1 else @y
+    y = if @playfield.should_push then @y else @y+1
     @sprite.x = (@x * @playfield.unit) - diff
-    @sprite.y = COLS * @playfield.unit - ((y) * @playfield.unit) - diff
+    @sprite.y = (y * @playfield.unit)  - diff
   mv_swap:=>          @playfield.swap @x, @y
   mv_left:=>          @x-- if @x > 0
-  mv_right:(cursor)=> @x++ if @x < ROWS - 2
-  mv_down:(cursor)=>  @y-- if @y > 0
-  mv_up:(cursor)=>    @y++ if @y < COLS - 1
+  mv_right:(cursor)=> @x++ if @x < COLS - 2
+  mv_down:(cursor)=>  @y++ if @y < ROWS - 1
+  mv_up:(cursor)=>    @y-- if @y > 0

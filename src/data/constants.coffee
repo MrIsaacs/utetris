@@ -1,6 +1,7 @@
 # Playfield size
-window.ROWS = 6
-window.COLS = 12
+window.ROWS = 12
+window.COLS = 6
+window.PANELS = ROWS * COLS
 #number of starting blocks
 window.NRBLOCK = 17
 # States
