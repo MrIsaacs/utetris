@@ -41,8 +41,18 @@ class window.Component.Cursor
     y = if @playfield.should_push then @y else @y+1
     @sprite.x = (@x * @playfield.unit) - diff
     @sprite.y = (y * @playfield.unit)  - diff
-  mv_swap:=>          @playfield.swap @x, @y
-  mv_left:=>          @x-- if @x > 0
-  mv_right:(cursor)=> @x++ if @x < COLS - 2
-  mv_down:(cursor)=>  @y++ if @y < ROWS - 1
-  mv_up:(cursor)=>    @y-- if @y > 0
+  mv_swap:=>
+    return unless @playfield.running
+    @playfield.swap @x, @y
+  mv_left:=>
+    return unless @playfield.running
+    @x-- if @x > 0
+  mv_right:(cursor)=>
+    return unless @playfield.running
+    @x++ if @x < COLS - 2
+  mv_down:(cursor)=>
+    return unless @playfield.running
+    @y++ if @y < ROWS - 1
+  mv_up:(cursor)=>
+    return unless @playfield.running
+    @y-- if @y > 0

@@ -19,6 +19,7 @@ class window.Component.Playfield
   pushTime   : 0
   pushCounter: 0
   has_ai: false
+  running: false
   create_cover:=>
     @g = game.add.graphics @x, @y+(@unit*(ROWS+1))
     @g.clear()
@@ -81,12 +82,9 @@ class window.Component.Playfield
     @update_neighbors()
 
     @render()
+    @running = true
     return
 
-  #darkens newline
-  newline_dead:=>
-    for panel in @newline
-      panel.play_dead()
   # Adds a new line of blocks to the bottom of the grid and pushes the rest
   # up. If there is not enough room a the top, the game will game-over.
   # Returns 1 if succesfull.
@@ -113,16 +111,19 @@ class window.Component.Playfield
     return unless @should_push
     @newline = @new_panels 1, mode
     @fill_panels @newline, 1, mode
-    @newline_dead()
-  # Ends the current game.
+    for panel in @newline
+      panel.play_dead() 
   game_over:=>
-    for i in [0...PANELS]
-      @stack[i].play_face()
-      @tick = ->
-        console.log 'Game Over'
-        return
-    for i in [0...COLS]
-      @newline[i].play_face()
+    @stack[i].play_face()   for i in [0...PANELS]
+    @newline[i].play_face() for i in [0...COLS]
+    @running = false
+    console.log 'gameover',
+      @stack[0].i
+      @stack[1].i
+      @stack[2].i
+      @stack[3].i
+      @stack[4].i
+      @stack[5].i
     @pushCounter = 0
     return
   #grid of blocks
@@ -172,6 +173,7 @@ class window.Component.Playfield
       combo += cnc[0]
       chain = true if cnc[1]
     [combo, chain]
+  
   # Swaps two blocks at location (x,y) and (x+1,y) if swapping is possible
   swap:(x, y)=>
     i = _f.xy_2_i x, y
@@ -217,9 +219,10 @@ class window.Component.Playfield
 
   #Checks if any block sprites are close to the top of the grid.
   # cols is the distance to the top.
-  is_danger:(cols)->
+  is_danger:=>
     for i in [0...COLS]
-      return true if @stack[i].i != null
+      if @stack[i] && @stack[i].i >= 0 && @stack[i].i != null
+        return true 
     false
 
   ### The tick function is the main function of the TaGame object.
@@ -230,7 +233,7 @@ class window.Component.Playfield
   # updates the sprites to the correct locations in the canvas.
   ###
   tick_push:=>
-    if @cursor.controls && @cursor.controls.push.isDown
+    if @cursor.controls && @cursor.controls.push.isDown && @running
       @pushCounter -= 100
     else
       @pushCounter--
@@ -238,6 +241,7 @@ class window.Component.Playfield
       @pushCounter = @pushTime
       @score      += @push()
   tick:=>
+    return unless @running
     @tick_push() if @should_push
     @update_neighbors()
     @update_panels_state()
