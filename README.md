@@ -1,31 +1,30 @@
-# Tetris Attack JS
-An open-source implementation of the old SNES game Tetris Attack (also known as
-Panel de Pon).
-This aims to be an exact replica in terms of gameplay but with a couple of bugs
-fixed, like chains not counting beyond 13 combos.
-Furthermore, online multiplayer will be added in the future.
+# Description
 
-This is based upon an earlier code draft in go-lang in collaboration with
-[jessethegame](https://github.com/jessethegame/), called
+A open-source clone of Panel de Pon / Tetris Attack
+
+# Dependencies
+
+* Coffescript
+* Gulp
+* Sinatra (Ruby Server)
+
+# Credits
+This source code is a heavily modifed version of `tzwaan`
+which is based on a go varaion by `jessethegame`
+[tetris-attack-js](https://github.com/tzwaan/tetris-attack-js)
 [go-attack](https://github.com/jessethegame/go-attack)
+[jessethegame](https://github.com/jessethegame/), called
 
-## Current state
-The game is far from finished but is playable.
-Currently there is only a one player mode. Blocks are randomly generated and
-can form combos as well as chains. The block behaviour is very close to the
-original, but there are possibly still a few bugs in some edge cases.
-There are currently no checks done to see whether newly spawned blocks make a
-combo or not.
+# Goal
 
-## Live version
-A mostly up-to-date version can be played here:
-[tetris-attack-js](http://tij.men/tetris-attack-js/)
+To build a multiplayer version of tetris attack for competitve play.
 
-## Sprites
-In the sprite section are some custom blocks that I made about 2 years ago based
-on different social media logos. Some of these are out of date since either
-the logos have changed, or the media stopped existing.
+Its likely once I've learned how to implement everything in Coffeescript
+I will begin to port the game into something standalone such as Unity or
+Java or C++
 
-The first version of this implementation was created at a game jam organised by
-study association [via](http://svia.nl/lang/en). An extra block sprite with the
-via logo has been added.
+
+# Playfield
+
+The panels on the playfield are stored in a single dimenional array.
+The panels start from the top-left corner.
