@@ -1,7 +1,9 @@
-# States
-
-window.NRBLOCK = 17
+# Playfield size
+window.ROWS = 6
+window.COLS = 12
 #number of starting blocks
+window.NRBLOCK = 17
+# States
 window.STATIC = 0
 window.HANG   = 1
 window.FALL   = 2

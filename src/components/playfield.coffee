@@ -7,20 +7,20 @@ class window.Component.Playfield
   unit       : null
   rows       : null
   cols       : null
-  nr_blocks  : null
   blocks     : null
   newline    : null
   combo      : null
   chain      : null
   command    : null
   cursor     : null
-  wall       : null
+  blank      : null
   score      : 0
   scoreText  : null
   pushTime   : 0
   pushCounter: 0
+  has_ai: false
   create_cover:=>
-    @g = game.add.graphics @x, @y+(@unit*(@cols+1))
+    @g = game.add.graphics @x, @y+(@unit*(COLS+1))
     @g.clear()
     @g.beginFill 0xFFFFFF, 1
     @g.drawRect 0, 0, @width, @unit*2
@@ -31,10 +31,11 @@ class window.Component.Playfield
     @g.beginFill 0x000000, 1
     @g.drawRect 0, 0, @width, @height
     @g.endFill()
-  create:(@rows, @cols, @nr_blocks)=>
-    @unit = (game.stage.height * 0.8) / @cols
-    @height = (@cols+1) * @unit
-    @width  = @rows * @unit
+  create:(opts={})=>
+    @should_push = opts.push || false
+    @unit   = (game.stage.height * 0.8) / COLS
+    @height = (COLS+1) * @unit
+    @width  = ROWS     * @unit
 
     @x = (game.stage.width   / 2) - (@width  / 2)
     @y = (game.stage.height  / 2) - (@height / 2)
@@ -49,19 +50,21 @@ class window.Component.Playfield
     @layer_cursor.x = @x
     @layer_cursor.y = @y
 
-    @stack    = @new_blocks @rows, @cols
-    @newline  = @new_blocks 6, 1
+    @stack    = @new_blocks ROWS, COLS
+    @newline  = @new_blocks 6, 1 if @should_push
 
-    @fill_blocks @stack  , 6, 4
-    @fill_blocks @newline, 6, 1
+    @fill_blocks @stack  , 6, 4, 'unique'
+    @fill_blocks @newline, 6, 1, 'unique' if @should_push
+    @newline_dead() if @should_push
 
     @command   = null
 
     @cursor = new Component.Cursor()
-    @cursor.create @, ai: true
+    @cursor.create @, ai: @has_ai
 
-    @ai = new Component.Ai()
-    @ai.create @playfield, @cursor
+    if @has_ai
+      @ai = new Component.Ai()
+      @ai.create @, @cursor
 
     @chain = 0
     @pushTime = PUSHTIME
@@ -71,8 +74,9 @@ class window.Component.Playfield
     @score_lbl = new Component.Score()
     @score_lbl.create()
 
-    @wall = new Component.Panel()
-    @wall.create @, null, null, true
+    #blank panel
+    @blank = new Component.Panel()
+    @blank.create @, null, null, true
 
     @create_cover()
 
@@ -80,6 +84,10 @@ class window.Component.Playfield
     @render()
     return
 
+  #darkens newline
+  newline_dead:=>
+    for x in [0...ROWS]
+      @newline[x][0].play_dead()
   # Adds a new line of blocks to the bottom of the grid and pushes the rest
   # up. If there is not enough room a the top, the game will game-over.
   # Returns 1 if succesfull.
@@ -87,27 +95,27 @@ class window.Component.Playfield
     if @is_danger()
       @game_over()
       return 0
-    blocks = @new_blocks @rows, @cols
+    blocks = @new_blocks ROWS, COLS
 
-    for x in [0...@rows]
-      for y in [0...@cols-1]
+    for x in [0...ROWS]
+      for y in [0...COLS-1]
         blocks[x][y + 1] = @stack[x][y]
-      @stack[x][@cols - 1].erase()
+      @stack[x][COLS - 1].erase()
       blocks[x][0] = @newline[x][0]
       blocks[x][0].play_live()
     @stack   = blocks
-    @newline = @new_blocks 6, 1
-    @fill_blocks @newline, 6, 1
 
-    for x in [0...@rows]
-      @newline[x][0].play_dead()
-    @cursor.y++ if @cursor.y < @cols - 1
+    @newline = @new_blocks 6, 1, 'random'
+    @fill_blocks @newline, 6, 1, 'random'
+
+    @newline_dead()
+    @cursor.y++ if @cursor.y < COLS - 1
     1
 
   # Ends the current game.
   game_over:=>
-    for x in [0...@rows]
-      for y in [0...@cols]
+    for x in [0...ROWS]
+      for y in [0...COLS]
         if @stack[x][y].sprite
           @stack[x][y].play_face()
         @tick = ->
@@ -125,27 +133,31 @@ class window.Component.Playfield
         panels[x][y] = new Component.Panel()
         panels[x][y].create @, x, y
     panels
-  fill_blocks:(stack, rows, cols)=>
+  fill_blocks:(stack, rows, cols, mode=null)=>
     for x in [0...rows]
       for y in [0...cols]
-        stack[x][y].set()
+        switch mode
+          when 'unique' then stack[x][y].set 'unique'
+          when 'random' then stack[x][y].set 'random'
+          else
+            stack[x][y].set mode[x][y]
   # Updates the neighbor references in each block in the grid.
   update_neighbors:=>
     panel = undefined
-    for x in [0...@rows]
-      for y in [0...@cols]
+    for x in [0...ROWS]
+      for y in [0...COLS]
         panel = @stack[x][y]
-        panel.left  = if x > 0         then @stack[x - 1][y] else @wall
-        panel.right = if x < @rows - 1 then @stack[x + 1][y] else @wall
-        panel.under = if y > 0         then @stack[x][y - 1] else @wall
-        panel.above = if y < @cols - 1 then @stack[x][y + 1] else @wall
+        panel.left  = if x > 0         then @stack[x - 1][y] else @blank
+        panel.right = if x < ROWS - 1 then @stack[x + 1][y] else @blank
+        panel.under = if y > 0         then @stack[x][y - 1] else @blank
+        panel.above = if y < COLS - 1 then @stack[x][y + 1] else @blank
 
   # Updates the state of the grid.
   # Blocks are only dependent on the state of their under-neighbor, so
   # this can be done from the bottom up.
   update_panels_state:=>
-    for x in [0...@rows]
-      for y in [0...@cols]
+    for x in [0...ROWS]
+      for y in [0...COLS]
         @stack[x][y].update_state()
         @stack[x][y].x = x
         @stack[x][y].y = y
@@ -156,8 +168,8 @@ class window.Component.Playfield
   update_chain_and_combo:=>
     combo = 0
     chain = false
-    for x in [0...@rows]
-      for y in [0...@cols]
+    for x in [0...ROWS]
+      for y in [0...COLS]
         do (x,y)=>
           cnc = @stack[x][y].chain_and_combo()
           combo += cnc[0]
@@ -171,8 +183,8 @@ class window.Component.Playfield
   # returns a boolean
   chainOver:=>
     chain = true
-    for x in [0...@rows]
-      for y in [0...@cols]
+    for x in [0...ROWS]
+      for y in [0...COLS]
         chain = false if @stack[x][y].chain
     chain
 
@@ -209,8 +221,8 @@ class window.Component.Playfield
   #Checks if any block sprites are close to the top of the grid.
   # cols is the distance to the top.
   is_danger:(cols)->
-    for x in [0...@rows]
-      return true if @stack[x][@cols-1].i != null
+    for x in [0...ROWS]
+      return true if @stack[x][COLS-1].i != null
     false
 
   ### The tick function is the main function of the TaGame object.
@@ -229,10 +241,10 @@ class window.Component.Playfield
       @pushCounter = @pushTime
       @score      += @push()
   tick:=>
-    @tick_push()
+    @tick_push() if @should_push
     @update_neighbors()
     @update_panels_state()
-    @ai.update()
+    @ai.update() if @has_ai
     # combo n chain
     cnc = @update_chain_and_combo()
     if @chain
@@ -255,19 +267,25 @@ class window.Component.Playfield
         @score += @chainToScore(@chain + 1)
       console.log 'Score: ', @score
   update_stack:=>
-    for x in [0...@rows]
-      for y in [0...@cols]
+    for x in [0...ROWS]
+      for y in [0...COLS]
         @stack[x][y].render()
   update_newline:=>
-    for x in [0...@rows]
+    for x in [0...ROWS]
       @newline[x][0].render true
+  panel_i:(x,y)=>
+    if @stack[x] && @stack[x][y] && @stack[x][y].i != null
+      @stack[x][y].i
+    else
+      null
   render:->
     @update_stack()
-    @update_newline()
+    @update_newline() if @should_push
 
     @cursor.update()
     @score_lbl.update @chain, @score
 
-    lift = @y + (@pushCounter / @pushTime * @unit)
-    @layer_block.y  = lift
-    @layer_cursor.y = lift
+    if @should_push
+      lift = @y + (@pushCounter / @pushTime * @unit)
+      @layer_block.y  = lift
+      @layer_cursor.y = lift

@@ -40,6 +40,8 @@ class controller
     #game.load.audio 'sizzle'   , './sizzle.mp3'
     #game.load.image 'splash', './splash.png'
     #game.load.image 'titlescreen', './titlescreen.jpg'
+    game.load.image 'button_menu', './button_menu.png'
+
     game.load.spritesheet 'cursor', './cursor.png'  , 38, 22, 2
     game.load.spritesheet 'panels', './panels.png'  , 16, 16, 136
 

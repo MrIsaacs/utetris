@@ -1,8 +1,9 @@
-#window._d      = new Core.Data()
+window._d      = new Core.Data()
 window.game    = new Phaser.Game _rez.w, _rez.h, Phaser.AUTO, 'phaser-example'
 game.state.add 'boot' , _states.boot
 game.state.add 'load' , _states.load
 game.state.add 'menu' , _states.menu
 
-game.state.add 'single_player', _states.single_player
+game.state.add 'mode_1p_vs_cpu', _states.mode_1p_vs_cpu
+game.state.add 'mode_puzzle'   , _states.mode_puzzle
 game.state.start 'boot'

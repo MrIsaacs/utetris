@@ -24,7 +24,7 @@ complete = ->
 _states.load =
   create: ->
     #_d.load()
-    game.state.start 'single_player'
+    game.state.start 'menu'
 
     #titlecard = game.add.image 0, 0, 'splash'
     #titlecard.scale.setTo _rez.scale

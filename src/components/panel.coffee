@@ -14,10 +14,10 @@ class window.Component.Panel
   sprite            : null
   @i                : null
 
-  create:(@playfield, @x, @y, wall=false)=>
+  create:(@playfield, @x, @y, blank=false)=>
     @state = STATIC
     @chain = false
-    @set_wall() if wall
+    @set_blank() if blank
 
     @sprite = game.make.sprite 0, 0, 'panels', @frame(0)
     @sprite.scale.setTo  (@playfield.unit / 16)
@@ -25,11 +25,11 @@ class window.Component.Panel
     @sprite.visible  = false
     @playfield.layer_block.add @sprite
 
-  # A wall block will see itself as its neighbors.
+  # A blank block will see itself as its neighbors.
   # It is never supposed to have a sprite and should always have a state
   # of STATIC.
-  # The wall is used on the outer edges of the grid.
-  set_wall:=>
+  # The blank is used on the outer edges of the grid.
+  set_blank:=>
     @x                 = null
     @y                 = null
     @under             = this
@@ -42,10 +42,27 @@ class window.Component.Panel
     @animation_counter = 0
 
   # if stops other panels from falling.
-  is_support:=>   @state != FALL and (@i != null or @playfield.wall is @)
+  is_support:=>   @state != FALL and (@i != null or @playfield.blank is @)
   is_clearable:=> @is_swappable() and @under.is_support() and @i != null
   is_comboable:=> @is_clearable() or @state is CLEAR and @counter is CLEARBLINKTIME
-  is_empty:=>     @counter is 0 and @i is null and @ != @playfield.wall
+  matched:(i)=>
+    left  = @playfield.panel_i @x-1, @y
+    right = @playfield.panel_i @x+1, @y
+    under = @playfield.panel_i @x  , @y-1
+    above = @playfield.panel_i @x  , @y+1
+
+    left2  = @playfield.panel_i @x-2, @y
+    right2 = @playfield.panel_i @x+2, @y
+    under2 = @playfield.panel_i @x  , @y-2
+    above2 = @playfield.panel_i @x  , @y+2
+
+    (left  is i && right  is i) ||
+    (above is i && under  is i) ||
+    (above is i && above2 is i) ||
+    (under is i && under2 is i) ||
+    (left  is i && left2  is i) ||
+    (right is i && right2 is i)
+  is_empty:=>     @counter is 0 and @i is null and @ != @playfield.blank
   # Whether this block can be swapped or not.
   # Blocks can be swapped as long as no counter is running.
   # Blocks cannot be swapped underneath a block about to fall from hang
@@ -73,7 +90,13 @@ class window.Component.Panel
     @sprite.animations.add 'danger', [@frame(0),@frame(4),@frame(0),@frame(3),@frame(2),@frame(3)]
     @sprite.animations.add 'face'  , [@frame(5)]
   set:(i)=>
-    @i = game.rnd.integerInRange(0,5) unless i
+    switch i
+      when 'unique'
+        @nocombo()
+      when 'random'
+        @i = game.rnd.integerInRange 0 , 5
+      else
+        @i = i
     @erase() if @i is null
     @sprite.visible = true
     @set_animation()
@@ -94,7 +117,7 @@ class window.Component.Panel
           @state = STATIC
           @chain = false
           return
-        else if @under is @playfield.wall
+        else if @under is @playfield.blank
           @state = STATIC
           @chain = false
         else if @under.state is HANG
@@ -122,7 +145,7 @@ class window.Component.Panel
       when CLEAR
         @erase()
       else
-        console.log 'Unknown block state!'
+        console.log "Unknown block state"
     return
 
   # Set the block sprite to the correct rendering location,
@@ -133,9 +156,10 @@ class window.Component.Panel
     return unless @sprite
     @sprite.x = @x * @playfield.unit
     if newline
-      @sprite.y = @playfield.cols * @playfield.unit
+      @sprite.y = COLS * @playfield.unit
     else
-      @sprite.y = @playfield.cols * @playfield.unit - ((@y + 1) * @playfield.unit)
+      y = if @playfield.should_push then @y+1 else @y
+      @sprite.y = COLS * @playfield.unit - ((y) * @playfield.unit)
       @animation_state = null if @animation_counter <= 0
       @animation_counter--    if @animation_counter > 0
       switch @animation_state
@@ -203,7 +227,7 @@ class window.Component.Panel
     @state          = STATIC
     @counter        = 0
     @chain          = false
-    @above.chain    = true if @above.i != null
+    @above.chain    = true if @above && @above.i != null
   # Sets this blocks state to CLEAR.
   # returns [combo, chain] where
   # combo is an int represeting the nr of blocks that are set to clear.
@@ -214,6 +238,10 @@ class window.Component.Panel
     @state   = CLEAR
     @play_clear()
     [1, @chain]
+  nocombo:=>
+    values = _.shuffle [0...5]
+    @i = _.find values, (i)=>
+      @matched(i) is false
   chain_and_combo:=>
     combo = 0
     chain = false

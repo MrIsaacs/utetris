@@ -9,9 +9,10 @@ class window.Component.Cursor
   create:(@playfield,opts={})=>
     # center the cursor
     @ai = opts.ai || false
+    console.log 'ai', @ai
 
-    @x = Math.floor(@playfield.rows / 2) - 1
-    @y = Math.floor(@playfield.cols / 3)
+    @x = Math.floor(ROWS / 2) - 1
+    @y = Math.floor(COLS / 3)
 
     @left  = @playfield.stack[@x][@y]
     @right = @playfield.stack[@x + 1][@y]
@@ -23,11 +24,12 @@ class window.Component.Cursor
     @sprite.animations.play 'idle', Math.round(game.time.desiredFps / 10), true
 
     @playfield.layer_cursor.add @sprite
-    @create_controls() unless @ai
+    @create_controls() if @ai is false
   create_controls:=>
     @controls      = game.input.keyboard.createCursorKeys()
     @controls.swap = game.input.keyboard.addKey Phaser.Keyboard.X
-    @controls.push = game.input.keyboard.addKey Phaser.Keyboard.C
+    if @playfield.should_push
+      @controls.push = game.input.keyboard.addKey Phaser.Keyboard.C
     @controls.left.onDown.add  @mv_left , @
     @controls.right.onDown.add @mv_right, @
     @controls.down.onDown.add  @mv_down , @
@@ -35,10 +37,11 @@ class window.Component.Cursor
     @controls.swap.onDown.add  @mv_swap , @
   update:=>
     diff = (@playfield.unit / 16) * 3
+    y = if @playfield.should_push then @y+1 else @y
     @sprite.x = (@x * @playfield.unit) - diff
-    @sprite.y = @playfield.cols * @playfield.unit - ((@y + 1) * @playfield.unit) - diff
+    @sprite.y = COLS * @playfield.unit - ((y) * @playfield.unit) - diff
   mv_swap:=>          @playfield.swap @x, @y
   mv_left:=>          @x-- if @x > 0
-  mv_right:(cursor)=> @x++ if @x < @playfield.rows - 2
+  mv_right:(cursor)=> @x++ if @x < ROWS - 2
   mv_down:(cursor)=>  @y-- if @y > 0
-  mv_up:(cursor)=>    @y++ if @y < @playfield.cols - 1
+  mv_up:(cursor)=>    @y++ if @y < COLS - 1

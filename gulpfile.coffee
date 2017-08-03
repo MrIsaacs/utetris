@@ -11,14 +11,20 @@ ug_opts =
 js_init  = './src/init.js'
 
 js_lib  = [
+  "./src/lib/lodash.js"
   "./src/lib/phaser.js"
   ]
 
 js_app = [
+  './src/core/data.coffee'
   './src/core/rez.coffee'
+  './src/core/filters.coffee'
+
   './src/data/constants.coffee'
 
   './src/components/ai.coffee'
+
+  './src/components/button_menu.coffee'
 
   './src/components/cursor.coffee'
   './src/components/playfield.coffee'
@@ -29,11 +35,11 @@ js_app = [
   './src/states/load.coffee'
   './src/states/menu.coffee'
 
-  './src/states/single_player.coffee'
+  './src/states/mode_1p_vs_cpu.coffee'
+  './src/states/mode_puzzle.coffee'
 
   './src/game.coffee'
   ]
-
 
 gulp.task 'js', ->
   gulp.src(js_app)
