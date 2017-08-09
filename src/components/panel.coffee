@@ -20,7 +20,7 @@ class window.Component.Panel
     @set_blank() if blank
 
     @sprite = game.make.sprite 0, 0, 'panels', @frame(0)
-    @sprite.scale.setTo  (@playfield.unit / 16)
+    @sprite.scale.setTo  @playfield.scale
     @sprite.smoothed = false
     @sprite.visible  = false
     @playfield.layer_block.add @sprite

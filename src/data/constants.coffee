@@ -28,3 +28,8 @@ window.ANIM_SWAPTIME       = 4
 window.ANIM_LANDTIME       = 0
 window.ANIM_CLEARBLINKTIME = 15
 window.ANIM_DANGERTIME     = 6
+
+
+window.WIN_UNIT   = 16
+window.WIN_WIDTH  = 256
+window.WIN_HEIGHT = 224

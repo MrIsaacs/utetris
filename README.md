@@ -19,6 +19,13 @@ Then visit
 
 `http://localhost:8080`
 
+
+# References
+
+## Examples of panel chaining
+
+https://www.dropbox.com/sh/w8cg4qbrnkltk1v/AAAmAsDKbqzd2h8X-KBqpOLQa?dl=0
+
 # Credits
 This source code is a heavily modifed version of `tzwaan`
 which is based on a go varaion by `jessethegame`

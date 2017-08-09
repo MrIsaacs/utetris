@@ -37,10 +37,16 @@ class controller
   update:=>
     @loader.setText "Loading #{game.load.progress}%"
   load:=>
+    game.stage.smoothed = false
     #game.load.audio 'sizzle'   , './sizzle.mp3'
     #game.load.image 'splash', './splash.png'
     #game.load.image 'titlescreen', './titlescreen.jpg'
+    game.load.image 'bg_blue', './bg_blue.png'
+
     game.load.image 'button_menu', './button_menu.png'
+
+    game.load.image 'vs_frame', './vs_frame.png'
+    game.load.image 'vs_bg'   , './vs_bg.png'
 
     game.load.spritesheet 'cursor', './cursor.png'  , 38, 22, 2
     game.load.spritesheet 'panels', './panels.png'  , 16, 16, 136

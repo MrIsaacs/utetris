@@ -6,6 +6,14 @@ class controller
   create:=>
     game.stage.backgroundColor = '#ffffff'
 
+    @bg = game.add.tileSprite 0, 0, game.world.width, game.world.height, 'bg_blue'
+    @bg.smoothed = false
+    unit  = (game.stage.height / (WIN_HEIGHT/WIN_UNIT))
+    scale = unit / WIN_UNIT
+    @bg.tileScale.y = scale
+    @bg.tileScale.x = scale
+
+
     console.log 'titlescreen'
     #@bg = game.add.sprite 0,0, 'titlescreen'
     #@bg.scale.setTo _rez.scale
@@ -29,6 +37,9 @@ class controller
     build.anchor.setTo 0, 1
     build.scale.setTo _rez.scale
   update:=>
+    @bg.tilePosition.y += 0.2
+    @bg.tilePosition.x -= 0.2
+
 ctrl = new controller()
 
 _states.menu =

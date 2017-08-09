@@ -20,12 +20,6 @@ class window.Component.Playfield
   pushCounter: 0
   has_ai: false
   running: false
-  create_cover:=>
-    @g = game.add.graphics @x, @y+(@unit*(ROWS+1))
-    @g.clear()
-    @g.beginFill 0xFFFFFF, 1
-    @g.drawRect 0, 0, @width, @unit*2
-    @g.endFill()
   create_bg:=>
     @g = game.add.graphics @x, @y
     @g.clear()
@@ -34,15 +28,16 @@ class window.Component.Playfield
     @g.endFill()
   create:(opts={})=>
     @should_push = opts.push || false
-    @unit   = (game.stage.height * 0.8) / ROWS
+    @unit        = opts.unit
+    @scale       = opts.scale
+
     @height = (ROWS+1) * @unit
     @width  = COLS     * @unit
 
-    @x = (game.stage.width   / 2) - (@width  / 2)
-    @y = (game.stage.height  / 2) - (@height / 2)
+    @x = opts.x
+    @y = opts.y
 
-    @create_bg()
-
+    #@create_bg()
     @layer_block  = game.add.group()
     @layer_block.x  = @x
     @layer_block.y  = @y
@@ -76,8 +71,6 @@ class window.Component.Playfield
     #blank panel
     @blank = new Component.Panel()
     @blank.create @, null, null, true
-
-    @create_cover()
 
     @update_neighbors()
 

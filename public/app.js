@@ -104848,6 +104848,12 @@ PIXI.TextureSilentFail = true;
 
   window.ANIM_DANGERTIME = 6;
 
+  window.WIN_UNIT = 16;
+
+  window.WIN_WIDTH = 256;
+
+  window.WIN_HEIGHT = 224;
+
 }).call(this);
 
 (function() {
@@ -105111,7 +105117,6 @@ PIXI.TextureSilentFail = true;
       this.push = bind(this.push, this);
       this.create = bind(this.create, this);
       this.create_bg = bind(this.create_bg, this);
-      this.create_cover = bind(this.create_cover, this);
     }
 
     Playfield.prototype.unit = null;
@@ -105146,14 +105151,6 @@ PIXI.TextureSilentFail = true;
 
     Playfield.prototype.running = false;
 
-    Playfield.prototype.create_cover = function() {
-      this.g = game.add.graphics(this.x, this.y + (this.unit * (ROWS + 1)));
-      this.g.clear();
-      this.g.beginFill(0xFFFFFF, 1);
-      this.g.drawRect(0, 0, this.width, this.unit * 2);
-      return this.g.endFill();
-    };
-
     Playfield.prototype.create_bg = function() {
       this.g = game.add.graphics(this.x, this.y);
       this.g.clear();
@@ -105167,12 +105164,12 @@ PIXI.TextureSilentFail = true;
         opts = {};
       }
       this.should_push = opts.push || false;
-      this.unit = (game.stage.height * 0.8) / ROWS;
+      this.unit = opts.unit;
+      this.scale = opts.scale;
       this.height = (ROWS + 1) * this.unit;
       this.width = COLS * this.unit;
-      this.x = (game.stage.width / 2) - (this.width / 2);
-      this.y = (game.stage.height / 2) - (this.height / 2);
-      this.create_bg();
+      this.x = opts.x;
+      this.y = opts.y;
       this.layer_block = game.add.group();
       this.layer_block.x = this.x;
       this.layer_block.y = this.y;
@@ -105199,7 +105196,6 @@ PIXI.TextureSilentFail = true;
       this.score_lbl.create();
       this.blank = new Component.Panel();
       this.blank.create(this, null, null, true);
-      this.create_cover();
       this.update_neighbors();
       this.render();
       this.running = true;
@@ -105611,7 +105607,7 @@ PIXI.TextureSilentFail = true;
         this.set_blank();
       }
       this.sprite = game.make.sprite(0, 0, 'panels', this.frame(0));
-      this.sprite.scale.setTo(this.playfield.unit / 16);
+      this.sprite.scale.setTo(this.playfield.scale);
       this.sprite.smoothed = false;
       this.sprite.visible = false;
       return this.playfield.layer_block.add(this.sprite);
@@ -106024,7 +106020,11 @@ PIXI.TextureSilentFail = true;
     };
 
     controller.prototype.load = function() {
+      game.stage.smoothed = false;
+      game.load.image('bg_blue', './bg_blue.png');
       game.load.image('button_menu', './button_menu.png');
+      game.load.image('vs_frame', './vs_frame.png');
+      game.load.image('vs_bg', './vs_bg.png');
       game.load.spritesheet('cursor', './cursor.png', 38, 22, 2);
       game.load.spritesheet('panels', './panels.png', 16, 16, 136);
       return game.load.start();
@@ -106114,8 +106114,14 @@ PIXI.TextureSilentFail = true;
     }
 
     controller.prototype.create = function() {
-      var x, y;
+      var scale, unit, x, y;
       game.stage.backgroundColor = '#ffffff';
+      this.bg = game.add.tileSprite(0, 0, game.world.width, game.world.height, 'bg_blue');
+      this.bg.smoothed = false;
+      unit = game.stage.height / (WIN_HEIGHT / WIN_UNIT);
+      scale = unit / WIN_UNIT;
+      this.bg.tileScale.y = scale;
+      this.bg.tileScale.x = scale;
       console.log('titlescreen');
       x = _rez.w / 2;
       y = _rez.h / 2;
@@ -106141,7 +106147,10 @@ PIXI.TextureSilentFail = true;
       return build.scale.setTo(_rez.scale);
     };
 
-    controller.prototype.update = function() {};
+    controller.prototype.update = function() {
+      this.bg.tilePosition.y += 0.2;
+      return this.bg.tilePosition.x -= 0.2;
+    };
 
     return controller;
 
@@ -106164,19 +106173,53 @@ PIXI.TextureSilentFail = true;
     function controller() {
       this.update = bind(this.update, this);
       this.create = bind(this.create, this);
-      this.playfield = new Component.Playfield();
+      this.create_frame = bind(this.create_frame, this);
+      this.create_bg = bind(this.create_bg, this);
+      this.playfield1 = new Component.Playfield();
+      this.playfield2 = new Component.Playfield();
     }
 
+    controller.prototype.create_bg = function(scale) {
+      this.bg = game.add.sprite(-(scale * 18), 0, 'vs_bg');
+      this.bg.smoothed = false;
+      return this.bg.scale.setTo(scale);
+    };
+
+    controller.prototype.create_frame = function(scale, x) {
+      this.frame = game.add.sprite(x, 0, 'vs_frame');
+      this.frame.smoothed = false;
+      return this.frame.scale.setTo(scale);
+    };
+
     controller.prototype.create = function() {
-      game.stage.backgroundColor = 0xFFFFFF;
-      return this.playfield.create({
-        push: true
+      var scale, unit, x;
+      game.stage.backgroundColor = 0x000000;
+      unit = game.stage.height / (WIN_HEIGHT / WIN_UNIT);
+      scale = unit / WIN_UNIT;
+      x = (game.stage.width / 2) - ((scale * WIN_WIDTH) / 2);
+      this.create_bg(scale);
+      this.playfield1.create({
+        push: true,
+        scale: scale,
+        unit: unit,
+        x: (scale * 8) + x,
+        y: scale * 8
       });
+      this.playfield2.create({
+        push: true,
+        scale: scale,
+        unit: unit,
+        x: (scale * 152) + x,
+        y: scale * 8
+      });
+      return this.create_frame(scale, x);
     };
 
     controller.prototype.update = function() {
-      this.playfield.tick();
-      return this.playfield.render();
+      this.playfield1.tick();
+      this.playfield2.tick();
+      this.playfield1.render();
+      return this.playfield2.render();
     };
 
     return controller;
