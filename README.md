@@ -52,7 +52,15 @@ The panels start from the top-left corner.
 [newline]
 
 
+#Panel States
+
+STATIC
+SWAP
+HANG -> FALL
+CLEAR
+POPPNG -> POPPED
+
 
 #Todo
 
-* Need to add POPPING, POPPED panel states (ref to https://github.com/omenking/panel-attack) `function Panel.clear(self)`
+* Need to add POPPING, POPPED panel states (ref to https://github.com/omenking/panel-attack) `function Panel.clear(self)` engine 705 FC_POP
