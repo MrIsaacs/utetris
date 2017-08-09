@@ -53,3 +53,6 @@ The panels start from the top-left corner.
 
 
 
+#Todo
+
+* Need to add POPPING, POPPED panel states (ref to https://github.com/omenking/panel-attack) `function Panel.clear(self)`

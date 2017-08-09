@@ -23,13 +23,13 @@ window.CLEARBLINKTIME   = 44
 window.CLEARPAUSETIME   = 23
 window.CLEAREXPLODETIME = 9
 window.PUSHTIME         = 1000
-# Animation timing
-window.ANIM_SWAPTIME       = 4
-window.ANIM_LANDTIME       = 0
-window.ANIM_CLEARBLINKTIME = 15
-window.ANIM_DANGERTIME     = 6
-
 
 window.WIN_UNIT   = 16
 window.WIN_WIDTH  = 256
 window.WIN_HEIGHT = 224
+
+# Animation timing - These aren't being used
+window.ANIM_SWAPTIME       = 4
+window.ANIM_LANDTIME       = 0
+window.ANIM_CLEARBLINKTIME = 15
+window.ANIM_DANGERTIME     = 6

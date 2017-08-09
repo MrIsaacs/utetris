@@ -104840,6 +104840,12 @@ PIXI.TextureSilentFail = true;
 
   window.PUSHTIME = 1000;
 
+  window.WIN_UNIT = 16;
+
+  window.WIN_WIDTH = 256;
+
+  window.WIN_HEIGHT = 224;
+
   window.ANIM_SWAPTIME = 4;
 
   window.ANIM_LANDTIME = 0;
@@ -104847,12 +104853,6 @@ PIXI.TextureSilentFail = true;
   window.ANIM_CLEARBLINKTIME = 15;
 
   window.ANIM_DANGERTIME = 6;
-
-  window.WIN_UNIT = 16;
-
-  window.WIN_WIDTH = 256;
-
-  window.WIN_HEIGHT = 224;
 
 }).call(this);
 
