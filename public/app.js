@@ -105154,7 +105154,7 @@ PIXI.TextureSilentFail = true;
     Playfield.prototype.create_bg = function() {
       this.g = game.add.graphics(this.x, this.y);
       this.g.clear();
-      this.g.beginFill(0x000000, 1);
+      this.g.beginFill(0xFFFFFF, 1);
       this.g.drawRect(0, 0, this.width, this.height);
       return this.g.endFill();
     };
@@ -105170,6 +105170,9 @@ PIXI.TextureSilentFail = true;
       this.width = COLS * this.unit;
       this.x = opts.x;
       this.y = opts.y;
+      if (!this.should_push) {
+        this.create_bg();
+      }
       this.layer_block = game.add.group();
       this.layer_block.x = this.x;
       this.layer_block.y = this.y;
@@ -106247,11 +106250,17 @@ PIXI.TextureSilentFail = true;
     }
 
     controller.prototype.create = function() {
-      game.stage.backgroundColor = 0xFFFFFF;
+      var scale, unit, x;
+      game.stage.backgroundColor = 0x000000;
+      unit = game.stage.height / (WIN_HEIGHT / WIN_UNIT);
+      scale = unit / WIN_UNIT;
+      x = (game.stage.width / 2) - ((scale * WIN_WIDTH) / 2);
       return this.playfield.create({
-        ai: false,
-        puzzle: window.puzzle,
-        push: false
+        push: false,
+        scale: scale,
+        unit: unit,
+        x: (scale * 8) + x,
+        y: scale * 8
       });
     };
 

@@ -46,3 +46,10 @@ Java or C++
 
 The panels on the playfield are stored in a single dimenional array.
 The panels start from the top-left corner.
+
+
+[stack]
+[newline]
+
+
+

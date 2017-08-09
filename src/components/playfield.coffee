@@ -23,7 +23,7 @@ class window.Component.Playfield
   create_bg:=>
     @g = game.add.graphics @x, @y
     @g.clear()
-    @g.beginFill 0x000000, 1
+    @g.beginFill 0xFFFFFF, 1
     @g.drawRect 0, 0, @width, @height
     @g.endFill()
   create:(opts={})=>
@@ -37,7 +37,7 @@ class window.Component.Playfield
     @x = opts.x
     @y = opts.y
 
-    #@create_bg()
+    @create_bg() unless @should_push
     @layer_block  = game.add.group()
     @layer_block.x  = @x
     @layer_block.y  = @y
