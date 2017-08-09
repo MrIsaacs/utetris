@@ -32,7 +32,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://omenking@bitbucket.org/omenking/tetris-attack-js.git"
+    "url": "https://github.com/omenking/tetris-attack-js/issues"
   },
   "author": "Andrew Brown <andrew@monsterboxpro.com>",
   "license": "MIT"

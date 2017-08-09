@@ -6,7 +6,18 @@ A open-source clone of Panel de Pon / Tetris Attack
 
 * Coffescript
 * Gulp
-* Sinatra (Ruby Server)
+
+
+# How to get started
+
+You'll need to run these two tasks
+
+`npm run serve` - serves static files via `http-server`
+`npm run watch` - watches gulp for recompliation
+
+Then visit
+
+`http://localhost:8080`
 
 # Credits
 This source code is a heavily modifed version of `tzwaan`
