@@ -105180,7 +105180,11 @@ PIXI.TextureSilentFail = true;
       this.layer_cursor.x = this.x;
       this.layer_cursor.y = this.y;
       this.stack = this.new_panels(ROWS);
-      this.fill_panels(this.stack, 4, 'unique');
+      if (opts.panels) {
+        this.fill_panels(this.stack, opts.panels);
+      } else {
+        this.fill_panels(this.stack, 4, 'unique');
+      }
       this.create_newline('unique');
       this.command = null;
       this.cursor = new Component.Cursor();
@@ -105271,26 +105275,37 @@ PIXI.TextureSilentFail = true;
     };
 
     Playfield.prototype.fill_panels = function(stack, rows, mode) {
-      var i, j, offset, ref, ref1, results, size;
+      var color, data, i, j, k, len, offset, ref, ref1, results, results1, size;
       if (mode == null) {
         mode = null;
       }
-      offset = ((stack.length / COLS) - rows) * COLS;
-      size = rows * COLS;
-      results = [];
-      for (i = j = ref = offset, ref1 = offset + size; ref <= ref1 ? j < ref1 : j > ref1; i = ref <= ref1 ? ++j : --j) {
-        switch (mode) {
-          case 'unique':
-            results.push(stack[i].set('unique'));
-            break;
-          case 'random':
-            results.push(stack[i].set('random'));
-            break;
-          default:
-            results.push(stack[i].set(mode[i]));
+      if (_.isArray(rows)) {
+        data = rows;
+        offset = (ROWS - (data.length / COLS)) * COLS;
+        results = [];
+        for (i = j = 0, len = data.length; j < len; i = ++j) {
+          color = data[i];
+          results.push(stack[offset + i].set(color));
         }
+        return results;
+      } else {
+        offset = ((stack.length / COLS) - rows) * COLS;
+        size = rows * COLS;
+        results1 = [];
+        for (i = k = ref = offset, ref1 = offset + size; ref <= ref1 ? k < ref1 : k > ref1; i = ref <= ref1 ? ++k : --k) {
+          switch (mode) {
+            case 'unique':
+              results1.push(stack[i].set('unique'));
+              break;
+            case 'random':
+              results1.push(stack[i].set('random'));
+              break;
+            default:
+              results1.push(stack[i].set(mode[i]));
+          }
+        }
+        return results1;
       }
-      return results;
     };
 
     Playfield.prototype.update_neighbors = function() {
@@ -105595,7 +105610,7 @@ PIXI.TextureSilentFail = true;
 
     Panel.prototype.sprite = null;
 
-    Panel.i = null;
+    Panel.prototype.i = null;
 
     Panel.prototype.create = function(playfield, x, y1, blank) {
       this.playfield = playfield;
@@ -105714,10 +105729,9 @@ PIXI.TextureSilentFail = true;
         default:
           this.i = i;
       }
-      if (this.i === null) {
-        this.erase();
+      if (this.i !== null) {
+        this.sprite.visible = true;
       }
-      this.sprite.visible = true;
       return this.set_animation();
     };
 
@@ -105746,6 +105760,7 @@ PIXI.TextureSilentFail = true;
             this.state = STATIC;
             this.chain = false;
           } else if (this.under.state === HANG) {
+            console.log('H', this.x, this.y);
             this.state = HANG;
             this.counter = this.under.counter;
             this.chain = this.under.chain;
@@ -105760,6 +105775,7 @@ PIXI.TextureSilentFail = true;
           this.state = FALL;
           break;
         case FALL:
+          console.log('FALLING', this.x, this.y);
           if (this.under.is_empty()) {
             this.fall();
           } else if (this.under.state === CLEAR) {
@@ -106255,12 +106271,14 @@ PIXI.TextureSilentFail = true;
       unit = game.stage.height / (WIN_HEIGHT / WIN_UNIT);
       scale = unit / WIN_UNIT;
       x = (game.stage.width / 2) - ((scale * WIN_WIDTH) / 2);
+      console.log('puzzle', _d.puzzles.skill_chain_demo_2.demo_4);
       return this.playfield.create({
         push: false,
         scale: scale,
         unit: unit,
         x: (scale * 8) + x,
-        y: scale * 8
+        y: scale * 8,
+        panels: _d.puzzles.skill_chain_demo_2.demo_4
       });
     };
 

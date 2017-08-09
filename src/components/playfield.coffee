@@ -47,7 +47,11 @@ class window.Component.Playfield
     @layer_cursor.y = @y
 
     @stack = @new_panels ROWS
-    @fill_panels @stack  , 4, 'unique'
+
+    if opts.panels
+      @fill_panels @stack, opts.panels
+    else
+      @fill_panels @stack, 4, 'unique'
 
     @create_newline 'unique'
 
@@ -129,15 +133,22 @@ class window.Component.Playfield
       panels[i].create @, x, y
     panels
   fill_panels:(stack, rows, mode=null)=>
-    offset = ((stack.length / COLS) - rows) * COLS
+    if _.isArray(rows)
+      data    = rows
+      offset  = (ROWS - (data.length / COLS)) * COLS
 
-    size = rows * COLS
-    for i in [offset...offset+size]
-      switch mode
-        when 'unique' then stack[i].set 'unique'
-        when 'random' then stack[i].set 'random'
-        else
-          stack[i].set mode[i]
+      for color,i in data
+        stack[offset+i].set color
+    else
+      offset = ((stack.length / COLS) - rows) * COLS
+
+      size = rows * COLS
+      for i in [offset...offset+size]
+        switch mode
+          when 'unique' then stack[i].set 'unique'
+          when 'random' then stack[i].set 'random'
+          else
+            stack[i].set mode[i]
   # Updates the neighbor references in each block in the grid.
   update_neighbors:=>
     for panel,i in @stack

@@ -8,14 +8,14 @@ class controller
     scale = unit / WIN_UNIT
 
     x = (game.stage.width / 2) - ((scale * WIN_WIDTH) /2)
-
+    console.log 'puzzle', _d.puzzles.skill_chain_demo_2.demo_4
     @playfield.create
-      push : false
-      scale: scale
-      unit : unit
-      x: (scale * 8) + x
-      y: scale * 8
-
+      push  : false
+      scale : scale
+      unit  : unit
+      x     : (scale * 8) + x
+      y     : scale * 8
+      panels: _d.puzzles.skill_chain_demo_2.demo_4
   update:=>
     @playfield.tick()
     @playfield.render()

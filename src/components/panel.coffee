@@ -12,7 +12,7 @@ class window.Component.Panel
   animation_counter : 0
   chain             : null
   sprite            : null
-  @i                : null
+  i                 : null
 
   create:(@playfield, @x, @y, blank=false)=>
     @state = STATIC
@@ -98,8 +98,9 @@ class window.Component.Panel
         @i = game.rnd.integerInRange 0 , 5
       else
         @i = i
-    @erase() if @i is null
-    @sprite.visible = true
+
+    unless @i is null
+      @sprite.visible = true
     @set_animation()
   # Update the current state of this block based on its own state, and the
   # states of its neighbors.
@@ -122,6 +123,7 @@ class window.Component.Panel
           @state = STATIC
           @chain = false
         else if @under.state is HANG
+          console.log 'H', @x, @y
           @state   = HANG
           @counter = @under.counter
           @chain   = @under.chain
@@ -133,6 +135,7 @@ class window.Component.Panel
       when HANG
         @state = FALL
       when FALL
+        console.log 'FALLING', @x, @y
         if @under.is_empty()
           @fall()
         else if @under.state is CLEAR
