@@ -52,13 +52,38 @@ The panels start from the top-left corner.
 [newline]
 
 
-#Panel States
+
+#Panel
+
+## States
 
 STATIC
 SWAP
 HANG -> FALL
 CLEAR
 POPPNG -> POPPED
+
+## Popping
+
+When a match occurs, the panels pop off the screen in order.
+This order appears to always be left to right top to bottom.
+
+Lets say you cleared
+
+```
+[X,O]
+[X,O]
+[X,O]
+```
+
+They would pop in this order
+
+```
+[1,2]
+[3,4]
+[5,6]
+```
+
 
 
 #Todo

@@ -20,8 +20,6 @@ class window.Component.Panel
     @set_blank() if blank
 
     @sprite = game.make.sprite 0, 0, 'panels', @frame(0)
-    @sprite.scale.setTo  @playfield.scale
-    @sprite.smoothed = false
     @sprite.visible  = false
     @playfield.layer_block.add @sprite
 
@@ -158,17 +156,17 @@ class window.Component.Panel
   # or in the bottom line still being added.
   render:(newline)=>
     return unless @sprite
-    @sprite.x = @x * @playfield.unit
+    @sprite.x = @x * UNIT
     if newline
-      @sprite.y = ROWS * @playfield.unit
+      @sprite.y = ROWS * UNIT
     else
       y = if @playfield.should_push then @y else @y+1
-      @sprite.y = y * @playfield.unit
+      @sprite.y = y * UNIT
       @animation_state = null if @animation_counter <= 0
       @animation_counter--    if @animation_counter > 0
       switch @animation_state
         when ANIM_SWAP_LEFT
-          step = @playfield.unit / ANIM_SWAPTIME
+          step = UNIT / ANIM_SWAPTIME
           @sprite.x += step * @animation_counter
         when ANIM_SWAP_RIGHT
           @sprite.x -= step * @animation_counter
@@ -259,6 +257,7 @@ class window.Component.Panel
     middle  = @clear()
     panel1  = p1.clear()
     panel2  = p2.clear()
+
     combo  += middle[0]
     combo  += panel1[0]
     combo  += panel2[0]

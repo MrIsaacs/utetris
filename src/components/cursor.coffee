@@ -19,7 +19,7 @@ class window.Component.Cursor
     @right = @playfield.stack[i+1]
 
     @sprite = game.make.sprite 0, 0, 'cursor', 0
-    @sprite.scale.setTo  (@playfield.unit / 16)
+    @sprite.scale.setTo  (UNIT / 16)
     @sprite.smoothed = false
     @sprite.animations.add  'idle', [0,1]
     @sprite.animations.play 'idle', Math.round(game.time.desiredFps / 10), true
@@ -37,10 +37,10 @@ class window.Component.Cursor
     @controls.up.onDown.add    @mv_up   , @
     @controls.swap.onDown.add  @mv_swap , @
   update:=>
-    diff = (@playfield.unit / 16) * 3
+    diff = (UNIT / 16) * 3
     y = if @playfield.should_push then @y else @y+1
-    @sprite.x = (@x * @playfield.unit) - diff
-    @sprite.y = (y * @playfield.unit)  - diff
+    @sprite.x = (@x * UNIT) - diff
+    @sprite.y = (y * UNIT)  - diff
   mv_swap:=>
     return unless @playfield.running
     @playfield.swap @x, @y

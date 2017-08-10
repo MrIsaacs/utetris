@@ -2,39 +2,18 @@ class controller
   constructor:->
     @playfield1 = new Component.Playfield()
     @playfield2 = new Component.Playfield()
-  create_bg:(scale)=>
-    @bg = game.add.sprite -(scale*18),0, 'vs_bg'
-    @bg.smoothed = false
-    @bg.scale.setTo scale
-  create_frame:(scale,x)=>
-    @frame = game.add.sprite x,0, 'vs_frame'
-    @frame.smoothed = false
-    @frame.scale.setTo scale
+  create_bg:=>
+    @bg = game.add.sprite 0,0, 'vs_bg'
+  create_frame:(offset)=>
+    @frame = game.add.sprite offset,0, 'vs_frame'
   create:=>
     game.stage.backgroundColor = 0x000000
-    unit  = (game.stage.height / (WIN_HEIGHT/WIN_UNIT))
-    scale = unit / WIN_UNIT
 
-    #x offset
-    x = (game.stage.width / 2) - ((scale * WIN_WIDTH) /2)
-
-    @create_bg scale
-
-    @playfield1.create
-      push : true
-      scale: scale
-      unit : unit
-      x: (scale * 8) + x
-      y: scale * 8
-
-    @playfield2.create
-      push : true
-      scale: scale
-      unit : unit
-      x: (scale * 152) + x
-      y: scale * 8
-
-    @create_frame scale, x
+    offset = 89
+    @create_bg()
+    @playfield1.create push: true, x: offset+8  , y: 8
+    @playfield2.create push: true, x: offset+152, y: 8
+    @create_frame(offset)
 
   update:=>
     @playfield1.tick()

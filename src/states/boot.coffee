@@ -37,7 +37,11 @@ class controller
   update:=>
     @loader.setText "Loading #{game.load.progress}%"
   load:=>
-    game.stage.smoothed = false
+    game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE
+    game.scale.setUserScale 3
+    game.renderer.renderSession.roundPixels = true
+    Phaser.Canvas.setImageRenderingCrisp(game.canvas)
+
     #game.load.audio 'sizzle'   , './sizzle.mp3'
     #game.load.image 'splash', './splash.png'
     #game.load.image 'titlescreen', './titlescreen.jpg'
@@ -56,3 +60,4 @@ ctrl = new controller()
 _states.boot =
   create: ctrl.create
   update: ctrl.update
+

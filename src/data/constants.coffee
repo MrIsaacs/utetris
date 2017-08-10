@@ -24,8 +24,8 @@ window.CLEARPAUSETIME   = 23
 window.CLEAREXPLODETIME = 9
 window.PUSHTIME         = 1000
 
-window.WIN_UNIT   = 16
-window.WIN_WIDTH  = 256
+window.UNIT = 16
+window.WIN_WIDTH  = 434 #256
 window.WIN_HEIGHT = 224
 
 # Animation timing - These aren't being used

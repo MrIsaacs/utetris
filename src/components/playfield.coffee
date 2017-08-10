@@ -28,11 +28,9 @@ class window.Component.Playfield
     @g.endFill()
   create:(opts={})=>
     @should_push = opts.push || false
-    @unit        = opts.unit
-    @scale       = opts.scale
 
-    @height = (ROWS+1) * @unit
-    @width  = COLS     * @unit
+    @height = (ROWS+1) * UNIT
+    @width  = COLS     * UNIT
 
     @x = opts.x
     @y = opts.y
@@ -190,37 +188,6 @@ class window.Component.Playfield
     for panel in @stack
       chain = false if panel.chain
     chain
-
-  comboToScore:(combo)->
-    switch combo
-      when 4 then 20
-      when 5 then 30
-      when 6 then 50
-      when 7 then 60
-      when 8 then 70
-      when 9 then 80
-      when 10 then 100
-      when 11 then 140
-      when 12 then 170
-      else
-        0
-  chainToScore:(chain)->
-    switch chain
-      when 2  then 50
-      when 3  then 80
-      when 4  then 150
-      when 5  then 300
-      when 6  then 400
-      when 7  then 500
-      when 8  then 700
-      when 9  then 900
-      when 10 then 1100
-      when 11 then 1300
-      when 12 then 1500
-      when 13 then 1800
-      else
-        0
-
   #Checks if any block sprites are close to the top of the grid.
   # cols is the distance to the top.
   is_danger:=>
@@ -260,16 +227,45 @@ class window.Component.Playfield
     @score_current cnc
     @render()
     return
+  score_combo:(combo)->
+    switch combo
+      when 4 then 20
+      when 5 then 30
+      when 6 then 50
+      when 7 then 60
+      when 8 then 70
+      when 9 then 80
+      when 10 then 100
+      when 11 then 140
+      when 12 then 170
+      else
+        0
+  score_chain:(chain)->
+    switch chain
+      when 2  then 50
+      when 3  then 80
+      when 4  then 150
+      when 5  then 300
+      when 6  then 400
+      when 7  then 500
+      when 8  then 700
+      when 9  then 900
+      when 10 then 1100
+      when 11 then 1300
+      when 12 then 1500
+      when 13 then 1800
+      else
+        0
   score_current:(cnc)=>
     if cnc[0] > 0
       console.log 'combo is ', cnc
       @score += cnc[0] * 10
-      @score += @comboToScore(cnc[0])
+      @score += @score_combo(cnc[0])
       if cnc[1]
         @chain++
         console.log 'chain is ', @chain + 1
       if @chain
-        @score += @chainToScore(@chain + 1)
+        @score += @score_chain(@chain + 1)
       console.log 'Score: ', @score
   update_stack:=>
     for panel in @stack
@@ -290,6 +286,6 @@ class window.Component.Playfield
     @score_lbl.update @chain, @score
 
     if @should_push
-      lift = @y + (@pushCounter / @pushTime * @unit)
+      lift = @y + (@pushCounter / @pushTime * UNIT)
       @layer_block.y  = lift
       @layer_cursor.y = lift

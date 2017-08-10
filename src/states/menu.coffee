@@ -7,19 +7,12 @@ class controller
     game.stage.backgroundColor = '#ffffff'
 
     @bg = game.add.tileSprite 0, 0, game.world.width, game.world.height, 'bg_blue'
-    @bg.smoothed = false
-    unit  = (game.stage.height / (WIN_HEIGHT/WIN_UNIT))
-    scale = unit / WIN_UNIT
-    @bg.tileScale.y = scale
-    @bg.tileScale.x = scale
-
 
     console.log 'titlescreen'
     #@bg = game.add.sprite 0,0, 'titlescreen'
-    #@bg.scale.setTo _rez.scale
 
-    x = _rez.w/2
-    y = _rez.h/2
+    x = WIN_WIDTH/2
+    y = WIN_HEIGHT/2
     @btn_1p_vs_cpu.create  x+rs(40), y-rs(100) , -100, '1P VS CPU'
     @btn_1p_vs_2p.create   x+rs(40), y+rs(20)  , -100, '1P VS 2P'
     @btn_puzzles.create    x+rs(40), y+rs(140) , -100, 'Puzzles'
@@ -35,10 +28,9 @@ class controller
       fontWeight: 'bold'
       align: 'center'
     build.anchor.setTo 0, 1
-    build.scale.setTo _rez.scale
   update:=>
-    @bg.tilePosition.y += 0.2
-    @bg.tilePosition.x -= 0.2
+    @bg.tilePosition.y += 0.5
+    @bg.tilePosition.x -= 0.5
 
 ctrl = new controller()
 

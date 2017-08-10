@@ -104840,9 +104840,9 @@ PIXI.TextureSilentFail = true;
 
   window.PUSHTIME = 1000;
 
-  window.WIN_UNIT = 16;
+  window.UNIT = 16;
 
-  window.WIN_WIDTH = 256;
+  window.WIN_WIDTH = 434;
 
   window.WIN_HEIGHT = 224;
 
@@ -105007,7 +105007,7 @@ PIXI.TextureSilentFail = true;
       this.left = this.playfield.stack[i];
       this.right = this.playfield.stack[i + 1];
       this.sprite = game.make.sprite(0, 0, 'cursor', 0);
-      this.sprite.scale.setTo(this.playfield.unit / 16);
+      this.sprite.scale.setTo(UNIT / 16);
       this.sprite.smoothed = false;
       this.sprite.animations.add('idle', [0, 1]);
       this.sprite.animations.play('idle', Math.round(game.time.desiredFps / 10), true);
@@ -105032,10 +105032,10 @@ PIXI.TextureSilentFail = true;
 
     Cursor.prototype.update = function() {
       var diff, y;
-      diff = (this.playfield.unit / 16) * 3;
+      diff = (UNIT / 16) * 3;
       y = this.playfield.should_push ? this.y : this.y + 1;
-      this.sprite.x = (this.x * this.playfield.unit) - diff;
-      return this.sprite.y = (y * this.playfield.unit) - diff;
+      this.sprite.x = (this.x * UNIT) - diff;
+      return this.sprite.y = (y * UNIT) - diff;
     };
 
     Cursor.prototype.mv_swap = function() {
@@ -105164,10 +105164,8 @@ PIXI.TextureSilentFail = true;
         opts = {};
       }
       this.should_push = opts.push || false;
-      this.unit = opts.unit;
-      this.scale = opts.scale;
-      this.height = (ROWS + 1) * this.unit;
-      this.width = COLS * this.unit;
+      this.height = (ROWS + 1) * UNIT;
+      this.width = COLS * UNIT;
       this.x = opts.x;
       this.y = opts.y;
       if (!this.should_push) {
@@ -105373,62 +105371,6 @@ PIXI.TextureSilentFail = true;
       return chain;
     };
 
-    Playfield.prototype.comboToScore = function(combo) {
-      switch (combo) {
-        case 4:
-          return 20;
-        case 5:
-          return 30;
-        case 6:
-          return 50;
-        case 7:
-          return 60;
-        case 8:
-          return 70;
-        case 9:
-          return 80;
-        case 10:
-          return 100;
-        case 11:
-          return 140;
-        case 12:
-          return 170;
-        default:
-          return 0;
-      }
-    };
-
-    Playfield.prototype.chainToScore = function(chain) {
-      switch (chain) {
-        case 2:
-          return 50;
-        case 3:
-          return 80;
-        case 4:
-          return 150;
-        case 5:
-          return 300;
-        case 6:
-          return 400;
-        case 7:
-          return 500;
-        case 8:
-          return 700;
-        case 9:
-          return 900;
-        case 10:
-          return 1100;
-        case 11:
-          return 1300;
-        case 12:
-          return 1500;
-        case 13:
-          return 1800;
-        default:
-          return 0;
-      }
-    };
-
     Playfield.prototype.is_danger = function() {
       var i, j, ref;
       for (i = j = 0, ref = COLS; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
@@ -105484,17 +105426,73 @@ PIXI.TextureSilentFail = true;
       this.render();
     };
 
+    Playfield.prototype.score_combo = function(combo) {
+      switch (combo) {
+        case 4:
+          return 20;
+        case 5:
+          return 30;
+        case 6:
+          return 50;
+        case 7:
+          return 60;
+        case 8:
+          return 70;
+        case 9:
+          return 80;
+        case 10:
+          return 100;
+        case 11:
+          return 140;
+        case 12:
+          return 170;
+        default:
+          return 0;
+      }
+    };
+
+    Playfield.prototype.score_chain = function(chain) {
+      switch (chain) {
+        case 2:
+          return 50;
+        case 3:
+          return 80;
+        case 4:
+          return 150;
+        case 5:
+          return 300;
+        case 6:
+          return 400;
+        case 7:
+          return 500;
+        case 8:
+          return 700;
+        case 9:
+          return 900;
+        case 10:
+          return 1100;
+        case 11:
+          return 1300;
+        case 12:
+          return 1500;
+        case 13:
+          return 1800;
+        default:
+          return 0;
+      }
+    };
+
     Playfield.prototype.score_current = function(cnc) {
       if (cnc[0] > 0) {
         console.log('combo is ', cnc);
         this.score += cnc[0] * 10;
-        this.score += this.comboToScore(cnc[0]);
+        this.score += this.score_combo(cnc[0]);
         if (cnc[1]) {
           this.chain++;
           console.log('chain is ', this.chain + 1);
         }
         if (this.chain) {
-          this.score += this.chainToScore(this.chain + 1);
+          this.score += this.score_chain(this.chain + 1);
         }
         return console.log('Score: ', this.score);
       }
@@ -105539,7 +105537,7 @@ PIXI.TextureSilentFail = true;
       this.cursor.update();
       this.score_lbl.update(this.chain, this.score);
       if (this.should_push) {
-        lift = this.y + (this.pushCounter / this.pushTime * this.unit);
+        lift = this.y + (this.pushCounter / this.pushTime * UNIT);
         this.layer_block.y = lift;
         return this.layer_cursor.y = lift;
       }
@@ -105625,8 +105623,6 @@ PIXI.TextureSilentFail = true;
         this.set_blank();
       }
       this.sprite = game.make.sprite(0, 0, 'panels', this.frame(0));
-      this.sprite.scale.setTo(this.playfield.scale);
-      this.sprite.smoothed = false;
       this.sprite.visible = false;
       return this.playfield.layer_block.add(this.sprite);
     };
@@ -105804,12 +105800,12 @@ PIXI.TextureSilentFail = true;
       if (!this.sprite) {
         return;
       }
-      this.sprite.x = this.x * this.playfield.unit;
+      this.sprite.x = this.x * UNIT;
       if (newline) {
-        return this.sprite.y = ROWS * this.playfield.unit;
+        return this.sprite.y = ROWS * UNIT;
       } else {
         y = this.playfield.should_push ? this.y : this.y + 1;
-        this.sprite.y = y * this.playfield.unit;
+        this.sprite.y = y * UNIT;
         if (this.animation_counter <= 0) {
           this.animation_state = null;
         }
@@ -105818,7 +105814,7 @@ PIXI.TextureSilentFail = true;
         }
         switch (this.animation_state) {
           case ANIM_SWAP_LEFT:
-            step = this.playfield.unit / ANIM_SWAPTIME;
+            step = UNIT / ANIM_SWAPTIME;
             return this.sprite.x += step * this.animation_counter;
           case ANIM_SWAP_RIGHT:
             return this.sprite.x -= step * this.animation_counter;
@@ -105949,11 +105945,11 @@ PIXI.TextureSilentFail = true;
     }
 
     Score.prototype.create = function() {
-      this.lbl = game.add.text(100, 100, '0', {
-        fontSize: '32px',
+      this.lbl = game.add.text(0, 10, '0', {
+        fontSize: '16px',
         fill: 0x000000
       });
-      this.lbl.y = 200;
+      this.lbl.y = 10;
       rsto(this.lbl);
       this.lbl.setTextBounds(50, 0, 46, 32);
       this.lbl.boundsAlignH = 'right';
@@ -106039,7 +106035,10 @@ PIXI.TextureSilentFail = true;
     };
 
     controller.prototype.load = function() {
-      game.stage.smoothed = false;
+      game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
+      game.scale.setUserScale(3);
+      game.renderer.renderSession.roundPixels = true;
+      Phaser.Canvas.setImageRenderingCrisp(game.canvas);
       game.load.image('bg_blue', './bg_blue.png');
       game.load.image('button_menu', './button_menu.png');
       game.load.image('vs_frame', './vs_frame.png');
@@ -106133,17 +106132,12 @@ PIXI.TextureSilentFail = true;
     }
 
     controller.prototype.create = function() {
-      var scale, unit, x, y;
+      var x, y;
       game.stage.backgroundColor = '#ffffff';
       this.bg = game.add.tileSprite(0, 0, game.world.width, game.world.height, 'bg_blue');
-      this.bg.smoothed = false;
-      unit = game.stage.height / (WIN_HEIGHT / WIN_UNIT);
-      scale = unit / WIN_UNIT;
-      this.bg.tileScale.y = scale;
-      this.bg.tileScale.x = scale;
       console.log('titlescreen');
-      x = _rez.w / 2;
-      y = _rez.h / 2;
+      x = WIN_WIDTH / 2;
+      y = WIN_HEIGHT / 2;
       this.btn_1p_vs_cpu.create(x + rs(40), y - rs(100), -100, '1P VS CPU');
       this.btn_1p_vs_2p.create(x + rs(40), y + rs(20), -100, '1P VS 2P');
       this.btn_puzzles.create(x + rs(40), y + rs(140), -100, 'Puzzles');
@@ -106162,13 +106156,12 @@ PIXI.TextureSilentFail = true;
         fontWeight: 'bold',
         align: 'center'
       });
-      build.anchor.setTo(0, 1);
-      return build.scale.setTo(_rez.scale);
+      return build.anchor.setTo(0, 1);
     };
 
     controller.prototype.update = function() {
-      this.bg.tilePosition.y += 0.2;
-      return this.bg.tilePosition.x -= 0.2;
+      this.bg.tilePosition.y += 0.5;
+      return this.bg.tilePosition.x -= 0.5;
     };
 
     return controller;
@@ -106198,40 +106191,30 @@ PIXI.TextureSilentFail = true;
       this.playfield2 = new Component.Playfield();
     }
 
-    controller.prototype.create_bg = function(scale) {
-      this.bg = game.add.sprite(-(scale * 18), 0, 'vs_bg');
-      this.bg.smoothed = false;
-      return this.bg.scale.setTo(scale);
+    controller.prototype.create_bg = function() {
+      return this.bg = game.add.sprite(0, 0, 'vs_bg');
     };
 
-    controller.prototype.create_frame = function(scale, x) {
-      this.frame = game.add.sprite(x, 0, 'vs_frame');
-      this.frame.smoothed = false;
-      return this.frame.scale.setTo(scale);
+    controller.prototype.create_frame = function(offset) {
+      return this.frame = game.add.sprite(offset, 0, 'vs_frame');
     };
 
     controller.prototype.create = function() {
-      var scale, unit, x;
+      var offset;
       game.stage.backgroundColor = 0x000000;
-      unit = game.stage.height / (WIN_HEIGHT / WIN_UNIT);
-      scale = unit / WIN_UNIT;
-      x = (game.stage.width / 2) - ((scale * WIN_WIDTH) / 2);
-      this.create_bg(scale);
+      offset = 89;
+      this.create_bg();
       this.playfield1.create({
         push: true,
-        scale: scale,
-        unit: unit,
-        x: (scale * 8) + x,
-        y: scale * 8
+        x: offset + 8,
+        y: 8
       });
       this.playfield2.create({
         push: true,
-        scale: scale,
-        unit: unit,
-        x: (scale * 152) + x,
-        y: scale * 8
+        x: offset + 152,
+        y: 8
       });
-      return this.create_frame(scale, x);
+      return this.create_frame(offset);
     };
 
     controller.prototype.update = function() {
@@ -106303,7 +106286,7 @@ PIXI.TextureSilentFail = true;
 (function() {
   window._d = new Core.Data();
 
-  window.game = new Phaser.Game(_rez.w, _rez.h, Phaser.AUTO, 'phaser-example');
+  window.game = new Phaser.Game(WIN_WIDTH, WIN_HEIGHT, Phaser.AUTO, 'phaser-example');
 
   game.state.add('boot', _states.boot);
 

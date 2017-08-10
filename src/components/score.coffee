@@ -1,9 +1,9 @@
 class window.Component.Score
   create:=>
-    @lbl = game.add.text 100, 100, '0',
-      fontSize: '32px'
+    @lbl = game.add.text 0, 10, '0',
+      fontSize: '16px'
       fill: 0x000000
-    @lbl.y = 200
+    @lbl.y = 10
     rsto @lbl
     @lbl.setTextBounds 50, 0, 46, 32
     @lbl.boundsAlignH = 'right'
