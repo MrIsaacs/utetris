@@ -11,8 +11,6 @@ class controller
     console.log 'puzzle', _d.puzzles.skill_chain_demo_2.demo_4
     @playfield.create
       push  : false
-      scale : scale
-      unit  : unit
       x     : (scale * 8) + x
       y     : scale * 8
       panels: _d.puzzles.skill_chain_demo_2.demo_4

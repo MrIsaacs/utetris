@@ -16,19 +16,24 @@ js_lib  = [
   ]
 
 js_app = [
+  './src/data/constants.coffee'
+  './src/core/controls.coffee'
   './src/core/data.coffee'
   './src/core/rez.coffee'
   './src/core/filters.coffee'
 
-  './src/data/constants.coffee'
 
   './src/components/ai.coffee'
 
-  './src/components/menu_cursor.coffee'
   './src/components/menu.coffee'
+  './src/components/menu_cursor.coffee'
 
-  './src/components/cursor.coffee'
+  './src/components/menu_pause.coffee'
+  './src/components/menu_pause_cursor.coffee'
+
   './src/components/playfield.coffee'
+  './src/components/playfield_cursor.coffee'
+
   './src/components/panel.coffee'
   './src/components/score.coffee'
 

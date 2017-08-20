@@ -4,6 +4,7 @@
 ###
 
 class window.Component.Playfield
+  @pia       : null # player number, used to detect input
   unit       : null
   rows       : null
   cols       : null
@@ -11,7 +12,6 @@ class window.Component.Playfield
   newline    : null
   combo      : null
   chain      : null
-  command    : null
   cursor     : null
   blank      : null
   score      : 0
@@ -20,14 +20,14 @@ class window.Component.Playfield
   pushCounter: 0
   has_ai: false
   running: false
-  create_bg:=>
-    @g = game.add.graphics @x, @y
-    @g.clear()
-    @g.beginFill 0xFFFFFF, 1
-    @g.drawRect 0, 0, @width, @height
-    @g.endFill()
+  constructor:(@pi)->
+    @menu_pause = new Component.MenuPause()
+    @cursor     = new Component.PlayfieldCursor()
+    @score_lbl  = new Component.Score()
+    @blank      = new Component.Panel()
+    @ai         = new Component.Ai()
   create:(opts={})=>
-    @sfx_swap = game.add.audio 'sfx_swap'
+    @sfx_swap  = game.add.audio 'sfx_swap'
 
     @should_push = opts.push || false
 
@@ -37,7 +37,6 @@ class window.Component.Playfield
     @x = opts.x
     @y = opts.y
 
-    @create_bg() unless @should_push
     @layer_block  = game.add.group()
     @layer_block.x  = @x
     @layer_block.y  = @y
@@ -46,34 +45,19 @@ class window.Component.Playfield
     @layer_cursor.x = @x
     @layer_cursor.y = @y
 
-    @stack = @new_panels ROWS
-
-    if opts.panels
-      @fill_panels @stack, opts.panels
-    else
-      @fill_panels @stack, 4, 'unique'
-
+    @create_stack   opts.panels
     @create_newline 'unique'
 
-    @command   = null
-
-    @cursor = new Component.Cursor()
     @cursor.create @, ai: @has_ai
+    @ai.create @, @cursor if @has_ai
 
-    if @has_ai
-      @ai = new Component.Ai()
-      @ai.create @, @cursor
-
-    @chain = 0
-    @pushTime = PUSHTIME
+    @score       = 0
+    @chain       = 0
+    @pushTime    = PUSHTIME
     @pushCounter = @pushTime
 
-    @score = 0
-    @score_lbl = new Component.Score()
+    @menu_pause.create @
     @score_lbl.create()
-
-    #blank panel
-    @blank = new Component.Panel()
     @blank.create @, null, null, true
 
     @update_neighbors()
@@ -81,10 +65,12 @@ class window.Component.Playfield
     @render()
     @running = true
     return
-
-  # Adds a new line of blocks to the bottom of the grid and pushes the rest
-  # up. If there is not enough room a the top, the game will game-over.
-  # Returns 1 if succesfull.
+  create_stack:(data)=>
+    @stack = @new_panels ROWS
+    if data
+      @fill_panels @stack, data
+    else
+      @fill_panels @stack, 4, 'unique'
   push:=>
     if @is_danger()
       @game_over()
@@ -109,7 +95,13 @@ class window.Component.Playfield
     @newline = @new_panels 1, mode
     @fill_panels @newline, 1, mode
     for panel in @newline
-      panel.play_dead() 
+      panel.play_dead()
+  pause:=>
+    @menu_pause.pause()
+    @running = false
+  unpause:=>
+    @running = true
+    @cursor.map_controls()
   game_over:=>
     @stack[i].play_face()   for i in [0...PANELS]
     @newline[i].play_face() for i in [0...COLS]
@@ -207,7 +199,9 @@ class window.Component.Playfield
   # updates the sprites to the correct locations in the canvas.
   ###
   tick_push:=>
-    if @cursor.controls && @cursor.controls.push.isDown && @running
+    if _d.controls.keys["pl#{@pi}_l"].isDown ||
+       _d.controls.keys["pl#{@pi}_r"].isDown &&
+       @running
       @pushCounter -= 100
     else
       @pushCounter--
@@ -286,6 +280,8 @@ class window.Component.Playfield
     @update_newline() if @should_push
 
     @cursor.update()
+    @menu_pause.update()
+
     @score_lbl.update @chain, @score
 
     if @should_push

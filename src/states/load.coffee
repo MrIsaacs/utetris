@@ -23,7 +23,7 @@ complete = ->
 
 _states.load =
   create: ->
-    #_d.load()
+    _d.load()
     game.state.start 'menu'
 
     #titlecard = game.add.image 0, 0, 'splash'
@@ -35,4 +35,3 @@ _states.load =
       #sizzle.onDecoded.add fadein, this
     #else
       #fadein()
-

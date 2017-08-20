@@ -7,34 +7,15 @@ class window.Component.MenuCursor
     @sprite = game.make.sprite @x, @y+(@index*UNIT), 'menu_cursor'
     @menu.sprite.addChild @sprite
 
-    @create_controls()
-  create_controls:=>
-    @controls       = game.input.keyboard.createCursorKeys()
-    @controls.btn_a = game.input.keyboard.addKey Phaser.Keyboard.X
-    @controls.btn_b = game.input.keyboard.addKey Phaser.Keyboard.Z
-    @controls.btn_l = game.input.keyboard.addKey Phaser.Keyboard.C
-    @controls.btn_r = game.input.keyboard.addKey Phaser.Keyboard.C
-
-    @controls.up.onDown.add        @up   , @
-    @controls.down.onDown.add      @down , @
-    @controls.left.onDown.add      @left , @
-    @controls.right.onDown.add     @right, @
-
-    @controls.btn_a.onDown.add  @btn_a, @
-    @controls.btn_b.onDown.add  @btn_b, @
-    @controls.btn_l.onDown.add  @btn_l, @
-    @controls.btn_r.onDown.add  @btn_r, @
-      #'mode_1p_vs_2p_local'
-      #'mode_1p_vs_2p_online'
-      #'mode_1p_vs_cpu'
-      #'mode_improve'
-      #'mode_option'
-  update:=>
-    @sprite.y = @y+(@index*UNIT)
-    @counter++
-    if @counter > MENUCURSORBLINK
-      @counter = 0
-      @sprite.visible = !@sprite.visible
+    @map_controls 1
+    @map_controls 2
+  map_controls:(pi)=>
+    _d.controls.map pi,
+      up   : @up
+      down : @down
+      a    : @confirm
+      b    : @cancel
+      start: @confirm
   up:=>
     unless @index is 0
       @sfx_select.play()
@@ -47,11 +28,13 @@ class window.Component.MenuCursor
       @counter = 0
       @sprite.visible = true
       @index++
-  left:=>
-  right:=>
+  confirm:=>
     @menu_items[@index]()
-  btn_a:=>
-    @menu_items[@index]()
-  btn_b:=>
-  btn_l:=>
-  btn_r:=>
+  cancel:=>
+    console.log 'cancel'
+  update:=>
+    @sprite.y = @y+(@index*UNIT)
+    @counter++
+    if @counter > MENUCURSORBLINK
+      @counter = 0
+      @sprite.visible = !@sprite.visible

@@ -104697,8 +104697,129 @@ PIXI.TextureSilentFail = true;
 */
 
 (function() {
+  window.ROWS = 12;
+
+  window.COLS = 6;
+
+  window.PANELS = ROWS * COLS;
+
+  window.NRBLOCK = 17;
+
+  window.STATIC = 0;
+
+  window.HANG = 1;
+
+  window.FALL = 2;
+
+  window.SWAP = 3;
+
+  window.CLEAR = 4;
+
+  window.ANIM_SWAP_LEFT = 0;
+
+  window.ANIM_SWAP_RIGHT = 1;
+
+  window.ANIM_LAND = 2;
+
+  window.ANIM_CLEAR = 4;
+
+  window.HANGTIME = 11;
+
+  window.FALLTIME = 4;
+
+  window.SWAPTIME = 4;
+
+  window.CLEARBLINKTIME = 44;
+
+  window.CLEARPAUSETIME = 23;
+
+  window.CLEAREXPLODETIME = 9;
+
+  window.PUSHTIME = 1000;
+
+  window.UNIT = 16;
+
+  window.WIN_WIDTH = 434;
+
+  window.WIN_HEIGHT = 224;
+
+  window.MENUCURSORBLINK = 12;
+
+  window.STARTPOS_PANELCURSOR_SPEED = 2;
+
+  window.ANIM_SWAPTIME = 4;
+
+  window.ANIM_LANDTIME = 0;
+
+  window.ANIM_CLEARBLINKTIME = 15;
+
+  window.ANIM_DANGERTIME = 6;
+
+}).call(this);
+
+(function() {
+  var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  window.Core.Controls = (function() {
+    function Controls() {
+      this.map_key = bind(this.map_key, this);
+      this.map = bind(this.map, this);
+      this.create();
+    }
+
+    Controls.prototype.create = function() {
+      this.keys = game.input.keyboard.createCursorKeys();
+      this.keys.pl1_up = game.input.keyboard.addKey(Phaser.Keyboard.UP);
+      this.keys.pl1_down = game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
+      this.keys.pl1_left = game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
+      this.keys.pl1_right = game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
+      this.keys.pl1_a = game.input.keyboard.addKey(Phaser.Keyboard.X);
+      this.keys.pl1_b = game.input.keyboard.addKey(Phaser.Keyboard.Z);
+      this.keys.pl1_l = game.input.keyboard.addKey(Phaser.Keyboard.C);
+      this.keys.pl1_r = game.input.keyboard.addKey(Phaser.Keyboard.C);
+      this.keys.pl1_start = game.input.keyboard.addKey(Phaser.Keyboard.ENTER);
+      this.keys.pl2_up = game.input.keyboard.addKey(Phaser.Keyboard.W);
+      this.keys.pl2_down = game.input.keyboard.addKey(Phaser.Keyboard.S);
+      this.keys.pl2_left = game.input.keyboard.addKey(Phaser.Keyboard.A);
+      this.keys.pl2_right = game.input.keyboard.addKey(Phaser.Keyboard.D);
+      this.keys.pl2_a = game.input.keyboard.addKey(Phaser.Keyboard.K);
+      this.keys.pl2_b = game.input.keyboard.addKey(Phaser.Keyboard.L);
+      this.keys.pl2_l = game.input.keyboard.addKey(Phaser.Keyboard.J);
+      this.keys.pl2_r = game.input.keyboard.addKey(Phaser.Keyboard.J);
+      return this.keys.pl2_start = game.input.keyboard.addKey(Phaser.Keyboard.P);
+    };
+
+    Controls.prototype.map = function(player_num, opts) {
+      var j, key, keys, len, results;
+      keys = "up down left right a b l r start".split(' ');
+      results = [];
+      for (j = 0, len = keys.length; j < len; j++) {
+        key = keys[j];
+        results.push(this.map_key(player_num, key, opts));
+      }
+      return results;
+    };
+
+    Controls.prototype.map_key = function(i, key, opts) {
+      var fun;
+      fun = opts[key] ? opts[key] : function() {};
+      this.keys["pl" + i + "_" + key].onDown.removeAll();
+      return this.keys["pl" + i + "_" + key].onDown.add(fun, this);
+    };
+
+    return Controls;
+
+  })();
+
+}).call(this);
+
+(function() {
+  var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
   window.Core.Data = (function() {
-    function Data() {}
+    function Data() {
+      this.load = bind(this.load, this);
+    }
 
     Data.prototype.version = {
       major: 0,
@@ -104710,6 +104831,10 @@ PIXI.TextureSilentFail = true;
       skill_chain_demo_2: {
         demo_4: [null, null, 5, 2, 2, null, null, null, 2, 5, 0, null, null, null, 4, 2, 4, null, null, 3, 5, 2, 3, null, null, 3, 0, 4, 0, null, null, 5, 5, 3, 4, null, 2, 3, 2, 5, 3, 4]
       }
+    };
+
+    Data.prototype.load = function() {
+      return this.controls = new Core.Controls();
     };
 
     return Data;
@@ -104800,65 +104925,6 @@ PIXI.TextureSilentFail = true;
 }).call(this);
 
 (function() {
-  window.ROWS = 12;
-
-  window.COLS = 6;
-
-  window.PANELS = ROWS * COLS;
-
-  window.NRBLOCK = 17;
-
-  window.STATIC = 0;
-
-  window.HANG = 1;
-
-  window.FALL = 2;
-
-  window.SWAP = 3;
-
-  window.CLEAR = 4;
-
-  window.ANIM_SWAP_LEFT = 0;
-
-  window.ANIM_SWAP_RIGHT = 1;
-
-  window.ANIM_LAND = 2;
-
-  window.ANIM_CLEAR = 4;
-
-  window.HANGTIME = 11;
-
-  window.FALLTIME = 4;
-
-  window.SWAPTIME = 4;
-
-  window.CLEARBLINKTIME = 44;
-
-  window.CLEARPAUSETIME = 23;
-
-  window.CLEAREXPLODETIME = 9;
-
-  window.PUSHTIME = 1000;
-
-  window.UNIT = 16;
-
-  window.WIN_WIDTH = 434;
-
-  window.WIN_HEIGHT = 224;
-
-  window.MENUCURSORBLINK = 12;
-
-  window.ANIM_SWAPTIME = 4;
-
-  window.ANIM_LANDTIME = 0;
-
-  window.ANIM_CLEARBLINKTIME = 15;
-
-  window.ANIM_DANGERTIME = 6;
-
-}).call(this);
-
-(function() {
   var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   window.Component.Ai = (function() {
@@ -104899,102 +104965,6 @@ PIXI.TextureSilentFail = true;
 (function() {
   var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-  window.Component.MenuCursor = (function() {
-    function MenuCursor() {
-      this.btn_r = bind(this.btn_r, this);
-      this.btn_l = bind(this.btn_l, this);
-      this.btn_b = bind(this.btn_b, this);
-      this.btn_a = bind(this.btn_a, this);
-      this.right = bind(this.right, this);
-      this.left = bind(this.left, this);
-      this.down = bind(this.down, this);
-      this.up = bind(this.up, this);
-      this.update = bind(this.update, this);
-      this.create_controls = bind(this.create_controls, this);
-      this.create = bind(this.create, this);
-    }
-
-    MenuCursor.prototype.create = function(menu, x, y, menu_items) {
-      this.menu = menu;
-      this.x = x;
-      this.y = y;
-      this.menu_items = menu_items;
-      this.sfx_select = game.add.audio('sfx_select');
-      this.counter = 0;
-      this.index = 0;
-      this.sprite = game.make.sprite(this.x, this.y + (this.index * UNIT), 'menu_cursor');
-      this.menu.sprite.addChild(this.sprite);
-      return this.create_controls();
-    };
-
-    MenuCursor.prototype.create_controls = function() {
-      this.controls = game.input.keyboard.createCursorKeys();
-      this.controls.btn_a = game.input.keyboard.addKey(Phaser.Keyboard.X);
-      this.controls.btn_b = game.input.keyboard.addKey(Phaser.Keyboard.Z);
-      this.controls.btn_l = game.input.keyboard.addKey(Phaser.Keyboard.C);
-      this.controls.btn_r = game.input.keyboard.addKey(Phaser.Keyboard.C);
-      this.controls.up.onDown.add(this.up, this);
-      this.controls.down.onDown.add(this.down, this);
-      this.controls.left.onDown.add(this.left, this);
-      this.controls.right.onDown.add(this.right, this);
-      this.controls.btn_a.onDown.add(this.btn_a, this);
-      this.controls.btn_b.onDown.add(this.btn_b, this);
-      this.controls.btn_l.onDown.add(this.btn_l, this);
-      return this.controls.btn_r.onDown.add(this.btn_r, this);
-    };
-
-    MenuCursor.prototype.update = function() {
-      this.sprite.y = this.y + (this.index * UNIT);
-      this.counter++;
-      if (this.counter > MENUCURSORBLINK) {
-        this.counter = 0;
-        return this.sprite.visible = !this.sprite.visible;
-      }
-    };
-
-    MenuCursor.prototype.up = function() {
-      if (this.index !== 0) {
-        this.sfx_select.play();
-        this.counter = 0;
-        this.sprite.visible = true;
-        return this.index--;
-      }
-    };
-
-    MenuCursor.prototype.down = function() {
-      if (this.index !== this.menu_items.length - 1) {
-        this.sfx_select.play();
-        this.counter = 0;
-        this.sprite.visible = true;
-        return this.index++;
-      }
-    };
-
-    MenuCursor.prototype.left = function() {};
-
-    MenuCursor.prototype.right = function() {
-      return this.menu_items[this.index]();
-    };
-
-    MenuCursor.prototype.btn_a = function() {
-      return this.menu_items[this.index]();
-    };
-
-    MenuCursor.prototype.btn_b = function() {};
-
-    MenuCursor.prototype.btn_l = function() {};
-
-    MenuCursor.prototype.btn_r = function() {};
-
-    return MenuCursor;
-
-  })();
-
-}).call(this);
-
-(function() {
-  var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
-
   window.Component.Menu = (function() {
     function Menu() {
       this.mode_option = bind(this.mode_option, this);
@@ -105008,7 +104978,7 @@ PIXI.TextureSilentFail = true;
     }
 
     Menu.prototype.create = function() {
-      this.sprite = game.add.sprite(40, 40, 'main_menu');
+      this.sprite = game.add.sprite(40, 40, 'menu');
       return this.cursor.create(this, 26, 39, [this.mode_1p_vs_2p_local, this.mode_1p_vs_2p_online, this.mode_1p_vs_cpu, this.mode_improve, this.mode_option]);
     };
 
@@ -105044,126 +105014,189 @@ PIXI.TextureSilentFail = true;
 (function() {
   var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-  window.Component.Cursor = (function() {
-    function Cursor() {
-      this.mv_up = bind(this.mv_up, this);
-      this.mv_down = bind(this.mv_down, this);
-      this.mv_right = bind(this.mv_right, this);
-      this.mv_left = bind(this.mv_left, this);
-      this.mv_swap = bind(this.mv_swap, this);
+  window.Component.MenuCursor = (function() {
+    function MenuCursor() {
       this.update = bind(this.update, this);
-      this.create_controls = bind(this.create_controls, this);
+      this.cancel = bind(this.cancel, this);
+      this.confirm = bind(this.confirm, this);
+      this.down = bind(this.down, this);
+      this.up = bind(this.up, this);
+      this.map_controls = bind(this.map_controls, this);
       this.create = bind(this.create, this);
     }
 
-    Cursor.prototype.x = null;
-
-    Cursor.prototype.y = null;
-
-    Cursor.prototype.left = null;
-
-    Cursor.prototype.right = null;
-
-    Cursor.prototype.sprite = null;
-
-    Cursor.prototype.game = null;
-
-    Cursor.prototype.controls = null;
-
-    Cursor.prototype.create = function(playfield, opts) {
-      var i;
-      this.playfield = playfield;
-      if (opts == null) {
-        opts = {};
-      }
+    MenuCursor.prototype.create = function(menu, x, y, menu_items) {
+      this.menu = menu;
+      this.x = x;
+      this.y = y;
+      this.menu_items = menu_items;
       this.sfx_select = game.add.audio('sfx_select');
-      this.ai = opts.ai || false;
-      console.log('ai', this.ai);
-      this.x = Math.floor(COLS / 2) - 1;
-      this.y = Math.floor(ROWS / 3);
-      i = _f.xy_2_i(this.x, this.y);
-      this.left = this.playfield.stack[i];
-      this.right = this.playfield.stack[i + 1];
-      this.sprite = game.make.sprite(0, 0, 'cursor', 0);
-      this.sprite.scale.setTo(UNIT / 16);
-      this.sprite.smoothed = false;
-      this.sprite.animations.add('idle', [0, 1]);
-      this.sprite.animations.play('idle', Math.round(game.time.desiredFps / 10), true);
-      this.playfield.layer_cursor.add(this.sprite);
-      if (this.ai === false) {
-        return this.create_controls();
+      this.counter = 0;
+      this.index = 0;
+      this.sprite = game.make.sprite(this.x, this.y + (this.index * UNIT), 'menu_cursor');
+      this.menu.sprite.addChild(this.sprite);
+      this.map_controls(1);
+      return this.map_controls(2);
+    };
+
+    MenuCursor.prototype.map_controls = function(pi) {
+      return _d.controls.map(pi, {
+        up: this.up,
+        down: this.down,
+        a: this.confirm,
+        b: this.cancel,
+        start: this.confirm
+      });
+    };
+
+    MenuCursor.prototype.up = function() {
+      if (this.index !== 0) {
+        this.sfx_select.play();
+        this.counter = 0;
+        this.sprite.visible = true;
+        return this.index--;
       }
     };
 
-    Cursor.prototype.create_controls = function() {
-      this.controls = game.input.keyboard.createCursorKeys();
-      this.controls.swap = game.input.keyboard.addKey(Phaser.Keyboard.X);
-      if (this.playfield.should_push) {
-        this.controls.push = game.input.keyboard.addKey(Phaser.Keyboard.C);
+    MenuCursor.prototype.down = function() {
+      if (this.index !== this.menu_items.length - 1) {
+        this.sfx_select.play();
+        this.counter = 0;
+        this.sprite.visible = true;
+        return this.index++;
       }
-      this.controls.left.onDown.add(this.mv_left, this);
-      this.controls.right.onDown.add(this.mv_right, this);
-      this.controls.down.onDown.add(this.mv_down, this);
-      this.controls.up.onDown.add(this.mv_up, this);
-      return this.controls.swap.onDown.add(this.mv_swap, this);
     };
 
-    Cursor.prototype.update = function() {
-      var diff, y;
-      diff = (UNIT / 16) * 3;
-      y = this.playfield.should_push ? this.y : this.y + 1;
-      this.sprite.x = (this.x * UNIT) - diff;
-      return this.sprite.y = (y * UNIT) - diff;
+    MenuCursor.prototype.confirm = function() {
+      return this.menu_items[this.index]();
     };
 
-    Cursor.prototype.mv_swap = function() {
-      if (!this.playfield.running) {
+    MenuCursor.prototype.cancel = function() {
+      return console.log('cancel');
+    };
+
+    MenuCursor.prototype.update = function() {
+      this.sprite.y = this.y + (this.index * UNIT);
+      this.counter++;
+      if (this.counter > MENUCURSORBLINK) {
+        this.counter = 0;
+        return this.sprite.visible = !this.sprite.visible;
+      }
+    };
+
+    return MenuCursor;
+
+  })();
+
+}).call(this);
+
+(function() {
+  var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  window.Component.MenuPause = (function() {
+    function MenuPause() {
+      this.update = bind(this.update, this);
+      this.pause = bind(this.pause, this);
+      this.contiune = bind(this.contiune, this);
+      this.cancel = bind(this.cancel, this);
+      this.create = bind(this.create, this);
+      this.cursor = new Component.MenuPauseCursor();
+    }
+
+    MenuPause.prototype.create = function(playfield) {
+      this.playfield = playfield;
+      this.paused = false;
+      this.sprite = game.add.sprite(101, 100, 'menu_pause');
+      this.sprite.visible = false;
+      return this.cursor.create(this, 8, 8, [this.contiune, this.cancel]);
+    };
+
+    MenuPause.prototype.cancel = function() {
+      return game.state.start('menu');
+    };
+
+    MenuPause.prototype.contiune = function() {
+      this.paused = false;
+      this.sprite.visible = false;
+      return this.playfield.unpause();
+    };
+
+    MenuPause.prototype.pause = function() {
+      this.paused = true;
+      this.sprite.visible = true;
+      return this.cursor.map_controls();
+    };
+
+    MenuPause.prototype.update = function() {
+      if (!this.paused) {
         return;
       }
-      return this.playfield.swap(this.x, this.y);
+      return this.cursor.update();
     };
 
-    Cursor.prototype.mv_left = function() {
-      if (!this.playfield.running) {
-        return;
-      }
-      this.sfx_select.play();
-      if (this.x > 0) {
-        return this.x--;
+    return MenuPause;
+
+  })();
+
+}).call(this);
+
+(function() {
+  var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  window.Component.MenuPauseCursor = (function() {
+    function MenuPauseCursor() {
+      this.update = bind(this.update, this);
+      this.down = bind(this.down, this);
+      this.up = bind(this.up, this);
+      this.confirm = bind(this.confirm, this);
+      this.map_controls = bind(this.map_controls, this);
+      this.create = bind(this.create, this);
+    }
+
+    MenuPauseCursor.prototype.create = function(menu, x, y, menu_items) {
+      this.menu = menu;
+      this.x = x;
+      this.y = y;
+      this.menu_items = menu_items;
+      this.sfx_select = game.add.audio('sfx_select');
+      this.index = 0;
+      this.sprite = game.make.sprite(this.x, this.y + (this.index * UNIT), 'menu_pause_cursor');
+      return this.menu.sprite.addChild(this.sprite);
+    };
+
+    MenuPauseCursor.prototype.map_controls = function() {
+      console.log('mapping menu paused', this.menu.playfield.pi);
+      return _d.controls.map(this.menu.playfield.pi, {
+        up: this.up,
+        down: this.down,
+        a: this.confirm,
+        start: this.confirm
+      });
+    };
+
+    MenuPauseCursor.prototype.confirm = function() {
+      return this.menu_items[this.index]();
+    };
+
+    MenuPauseCursor.prototype.up = function() {
+      if (this.index !== 0) {
+        this.sfx_select.play();
+        return this.index--;
       }
     };
 
-    Cursor.prototype.mv_right = function(cursor) {
-      if (!this.playfield.running) {
-        return;
-      }
-      this.sfx_select.play();
-      if (this.x < COLS - 2) {
-        return this.x++;
+    MenuPauseCursor.prototype.down = function() {
+      if (this.index !== this.menu_items.length - 1) {
+        this.sfx_select.play();
+        return this.index++;
       }
     };
 
-    Cursor.prototype.mv_down = function(cursor) {
-      if (!this.playfield.running) {
-        return;
-      }
-      this.sfx_select.play();
-      if (this.y < ROWS - 1) {
-        return this.y++;
-      }
+    MenuPauseCursor.prototype.update = function() {
+      return this.sprite.y = this.y + (this.index * 12);
     };
 
-    Cursor.prototype.mv_up = function(cursor) {
-      if (!this.playfield.running) {
-        return;
-      }
-      this.sfx_select.play();
-      if (this.y > 0) {
-        return this.y--;
-      }
-    };
-
-    return Cursor;
+    return MenuPauseCursor;
 
   })();
 
@@ -105179,27 +105212,7 @@ PIXI.TextureSilentFail = true;
   var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
   window.Component.Playfield = (function() {
-    function Playfield() {
-      this.panel_i = bind(this.panel_i, this);
-      this.update_newline = bind(this.update_newline, this);
-      this.update_stack = bind(this.update_stack, this);
-      this.score_current = bind(this.score_current, this);
-      this.tick = bind(this.tick, this);
-      this.tick_push = bind(this.tick_push, this);
-      this.is_danger = bind(this.is_danger, this);
-      this.chainOver = bind(this.chainOver, this);
-      this.swap = bind(this.swap, this);
-      this.update_chain_and_combo = bind(this.update_chain_and_combo, this);
-      this.update_panels_state = bind(this.update_panels_state, this);
-      this.update_neighbors = bind(this.update_neighbors, this);
-      this.fill_panels = bind(this.fill_panels, this);
-      this.new_panels = bind(this.new_panels, this);
-      this.game_over = bind(this.game_over, this);
-      this.create_newline = bind(this.create_newline, this);
-      this.push = bind(this.push, this);
-      this.create = bind(this.create, this);
-      this.create_bg = bind(this.create_bg, this);
-    }
+    Playfield.pia = null;
 
     Playfield.prototype.unit = null;
 
@@ -105214,8 +105227,6 @@ PIXI.TextureSilentFail = true;
     Playfield.prototype.combo = null;
 
     Playfield.prototype.chain = null;
-
-    Playfield.prototype.command = null;
 
     Playfield.prototype.cursor = null;
 
@@ -105233,13 +105244,35 @@ PIXI.TextureSilentFail = true;
 
     Playfield.prototype.running = false;
 
-    Playfield.prototype.create_bg = function() {
-      this.g = game.add.graphics(this.x, this.y);
-      this.g.clear();
-      this.g.beginFill(0xFFFFFF, 1);
-      this.g.drawRect(0, 0, this.width, this.height);
-      return this.g.endFill();
-    };
+    function Playfield(pi) {
+      this.pi = pi;
+      this.panel_i = bind(this.panel_i, this);
+      this.update_newline = bind(this.update_newline, this);
+      this.update_stack = bind(this.update_stack, this);
+      this.score_current = bind(this.score_current, this);
+      this.tick = bind(this.tick, this);
+      this.tick_push = bind(this.tick_push, this);
+      this.is_danger = bind(this.is_danger, this);
+      this.chainOver = bind(this.chainOver, this);
+      this.swap = bind(this.swap, this);
+      this.update_chain_and_combo = bind(this.update_chain_and_combo, this);
+      this.update_panels_state = bind(this.update_panels_state, this);
+      this.update_neighbors = bind(this.update_neighbors, this);
+      this.fill_panels = bind(this.fill_panels, this);
+      this.new_panels = bind(this.new_panels, this);
+      this.game_over = bind(this.game_over, this);
+      this.unpause = bind(this.unpause, this);
+      this.pause = bind(this.pause, this);
+      this.create_newline = bind(this.create_newline, this);
+      this.push = bind(this.push, this);
+      this.create_stack = bind(this.create_stack, this);
+      this.create = bind(this.create, this);
+      this.menu_pause = new Component.MenuPause();
+      this.cursor = new Component.PlayfieldCursor();
+      this.score_lbl = new Component.Score();
+      this.blank = new Component.Panel();
+      this.ai = new Component.Ai();
+    }
 
     Playfield.prototype.create = function(opts) {
       if (opts == null) {
@@ -105251,42 +105284,39 @@ PIXI.TextureSilentFail = true;
       this.width = COLS * UNIT;
       this.x = opts.x;
       this.y = opts.y;
-      if (!this.should_push) {
-        this.create_bg();
-      }
       this.layer_block = game.add.group();
       this.layer_block.x = this.x;
       this.layer_block.y = this.y;
       this.layer_cursor = game.add.group();
       this.layer_cursor.x = this.x;
       this.layer_cursor.y = this.y;
-      this.stack = this.new_panels(ROWS);
-      if (opts.panels) {
-        this.fill_panels(this.stack, opts.panels);
-      } else {
-        this.fill_panels(this.stack, 4, 'unique');
-      }
+      this.create_stack(opts.panels);
       this.create_newline('unique');
-      this.command = null;
-      this.cursor = new Component.Cursor();
       this.cursor.create(this, {
         ai: this.has_ai
       });
       if (this.has_ai) {
-        this.ai = new Component.Ai();
         this.ai.create(this, this.cursor);
       }
+      this.score = 0;
       this.chain = 0;
       this.pushTime = PUSHTIME;
       this.pushCounter = this.pushTime;
-      this.score = 0;
-      this.score_lbl = new Component.Score();
+      this.menu_pause.create(this);
       this.score_lbl.create();
-      this.blank = new Component.Panel();
       this.blank.create(this, null, null, true);
       this.update_neighbors();
       this.render();
       this.running = true;
+    };
+
+    Playfield.prototype.create_stack = function(data) {
+      this.stack = this.new_panels(ROWS);
+      if (data) {
+        return this.fill_panels(this.stack, data);
+      } else {
+        return this.fill_panels(this.stack, 4, 'unique');
+      }
     };
 
     Playfield.prototype.push = function() {
@@ -105328,6 +105358,16 @@ PIXI.TextureSilentFail = true;
         results.push(panel.play_dead());
       }
       return results;
+    };
+
+    Playfield.prototype.pause = function() {
+      this.menu_pause.pause();
+      return this.running = false;
+    };
+
+    Playfield.prototype.unpause = function() {
+      this.running = true;
+      return this.cursor.map_controls();
     };
 
     Playfield.prototype.game_over = function() {
@@ -105475,7 +105515,7 @@ PIXI.TextureSilentFail = true;
      */
 
     Playfield.prototype.tick_push = function() {
-      if (this.cursor.controls && this.cursor.controls.push.isDown && this.running) {
+      if (_d.controls.keys["pl" + this.pi + "_l"].isDown || _d.controls.keys["pl" + this.pi + "_r"].isDown && this.running) {
         this.pushCounter -= 100;
       } else {
         this.pushCounter--;
@@ -105619,6 +105659,7 @@ PIXI.TextureSilentFail = true;
         this.update_newline();
       }
       this.cursor.update();
+      this.menu_pause.update();
       this.score_lbl.update(this.chain, this.score);
       if (this.should_push) {
         lift = this.y + (this.pushCounter / this.pushTime * UNIT);
@@ -105628,6 +105669,152 @@ PIXI.TextureSilentFail = true;
     };
 
     return Playfield;
+
+  })();
+
+}).call(this);
+
+(function() {
+  var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  window.Component.PlayfieldCursor = (function() {
+    function PlayfieldCursor() {
+      this.update = bind(this.update, this);
+      this.swap = bind(this.swap, this);
+      this.right = bind(this.right, this);
+      this.left = bind(this.left, this);
+      this.down = bind(this.down, this);
+      this.up = bind(this.up, this);
+      this.pause = bind(this.pause, this);
+      this.map_controls = bind(this.map_controls, this);
+      this.create = bind(this.create, this);
+    }
+
+    PlayfieldCursor.prototype.x = null;
+
+    PlayfieldCursor.prototype.y = null;
+
+    PlayfieldCursor.prototype.left = null;
+
+    PlayfieldCursor.prototype.right = null;
+
+    PlayfieldCursor.prototype.sprite = null;
+
+    PlayfieldCursor.prototype.game = null;
+
+    PlayfieldCursor.prototype.controls = null;
+
+    PlayfieldCursor.prototype.animating_start_pos = true;
+
+    PlayfieldCursor.prototype.create = function(playfield, opts) {
+      var diff;
+      this.playfield = playfield;
+      if (opts == null) {
+        opts = {};
+      }
+      this.counter = 0;
+      this.sfx_select = game.add.audio('sfx_select');
+      this.ai = opts.ai || false;
+      console.log('ai', this.ai);
+      this.x = 2;
+      this.y = 6;
+      diff = (UNIT / 16) * 3;
+      this.sprite = game.make.sprite(((COLS - 2) * UNIT) - diff, 0 - diff, 'playfield_cursor', 0);
+      this.sprite.animations.add('idle', [0, 1]);
+      this.sprite.animations.play('idle', Math.round(game.time.desiredFps / 10), true);
+      return this.playfield.layer_cursor.add(this.sprite);
+    };
+
+    PlayfieldCursor.prototype.map_controls = function() {
+      return _d.controls.map(this.playfield.pi, {
+        up: this.up,
+        down: this.down,
+        left: this.left,
+        right: this.right,
+        a: this.swap,
+        b: this.swap,
+        start: this.pause
+      });
+    };
+
+    PlayfieldCursor.prototype.pause = function() {
+      console.log('pause');
+      return this.playfield.pause();
+    };
+
+    PlayfieldCursor.prototype.up = function() {
+      if (!this.playfield.running) {
+        return;
+      }
+      this.sfx_select.play();
+      if (this.y > 0) {
+        return this.y--;
+      }
+    };
+
+    PlayfieldCursor.prototype.down = function() {
+      if (!this.playfield.running) {
+        return;
+      }
+      this.sfx_select.play();
+      if (this.y < ROWS - 1) {
+        return this.y++;
+      }
+    };
+
+    PlayfieldCursor.prototype.left = function() {
+      if (!this.playfield.running) {
+        return;
+      }
+      this.sfx_select.play();
+      if (this.x > 0) {
+        return this.x--;
+      }
+    };
+
+    PlayfieldCursor.prototype.right = function() {
+      if (!this.playfield.running) {
+        return;
+      }
+      this.sfx_select.play();
+      if (this.x < COLS - 2) {
+        return this.x++;
+      }
+    };
+
+    PlayfieldCursor.prototype.swap = function() {
+      if (!this.playfield.running) {
+        return;
+      }
+      return this.playfield.swap(this.x, this.y);
+    };
+
+    PlayfieldCursor.prototype.update = function() {
+      var diff, x, y;
+      diff = (UNIT / 16) * 3;
+      y = this.playfield.should_push ? this.y : this.y + 1;
+      x = (this.x * UNIT) - diff;
+      y = (y * UNIT) - diff;
+      if (this.animating_start_pos) {
+        if (this.sprite.y < y) {
+          return this.sprite.y += STARTPOS_PANELCURSOR_SPEED;
+        } else if (this.sprite.x > x) {
+          return this.sprite.x -= STARTPOS_PANELCURSOR_SPEED;
+        } else {
+          this.animating_start_pos = false;
+          if (this.ai === false) {
+            return this.map_controls();
+          }
+        }
+      } else {
+        diff = (UNIT / 16) * 3;
+        y = this.playfield.should_push ? this.y : this.y + 1;
+        this.sprite.x = (this.x * UNIT) - diff;
+        return this.sprite.y = (y * UNIT) - diff;
+      }
+    };
+
+    return PlayfieldCursor;
 
   })();
 
@@ -106127,16 +106314,16 @@ PIXI.TextureSilentFail = true;
       game.load.audio('msx_stage_critical', './msx_stage_critical.mp3');
       game.load.audio('sfx_select', './sfx_select.mp3');
       game.load.audio('sfx_swap', './sfx_swap.mp3');
-      game.load.image('mini_cursor', './mini_cursor.png');
-      game.load.image('mini_menu', './mini_menu.png');
+      game.load.image('bg_blue', './bg_blue.png');
+      game.load.image('menu', './menu.png');
+      game.load.image('menu_cursor', './menu_cursor.png');
+      game.load.image('menu_pause_cursor', './menu_pause_cursor.png');
+      game.load.image('menu_pause', './menu_pause.png');
       game.load.image('pause', './pause.png');
       game.load.image('countdown', './countdown.png');
-      game.load.image('bg_blue', './bg_blue.png');
-      game.load.image('main_menu', './main_menu.png');
-      game.load.image('menu_cursor', './menu_cursor.png');
-      game.load.image('vs_frame', './vs_frame.png');
-      game.load.image('vs_bg', './vs_bg.png');
-      game.load.spritesheet('cursor', './cursor.png', 38, 22, 2);
+      game.load.spritesheet('playfield_cursor', './playfield_cursor.png', 38, 22, 2);
+      game.load.image('playfield_vs_frame', './playfield_vs_frame.png');
+      game.load.image('playfield_vs_bg', './playfield_vs_bg.png');
       game.load.spritesheet('panels', './panels.png', 16, 16, 136);
       return game.load.start();
     };
@@ -106204,6 +106391,7 @@ PIXI.TextureSilentFail = true;
 
   _states.load = {
     create: function() {
+      _d.load();
       return game.state.start('menu');
     }
   };
@@ -106273,16 +106461,16 @@ PIXI.TextureSilentFail = true;
       this.create = bind(this.create, this);
       this.create_frame = bind(this.create_frame, this);
       this.create_bg = bind(this.create_bg, this);
-      this.playfield1 = new Component.Playfield();
-      this.playfield2 = new Component.Playfield();
+      this.playfield1 = new Component.Playfield(1);
+      this.playfield2 = new Component.Playfield(2);
     }
 
     controller.prototype.create_bg = function() {
-      return this.bg = game.add.sprite(0, 0, 'vs_bg');
+      return this.bg = game.add.sprite(0, 0, 'playfield_vs_bg');
     };
 
     controller.prototype.create_frame = function(offset) {
-      return this.frame = game.add.sprite(offset, 0, 'vs_frame');
+      return this.frame = game.add.sprite(offset, 0, 'playfield_vs_frame');
     };
 
     controller.prototype.create = function() {
@@ -106338,8 +106526,6 @@ PIXI.TextureSilentFail = true;
       console.log('puzzle', _d.puzzles.skill_chain_demo_2.demo_4);
       return this.playfield.create({
         push: false,
-        scale: scale,
-        unit: unit,
         x: (scale * 8) + x,
         y: scale * 8,
         panels: _d.puzzles.skill_chain_demo_2.demo_4

@@ -14,3 +14,5 @@ class window.Core.Data
         null, 5   , 5, 3, 4, null,
         2   , 3   , 2, 5, 3, 4
       ]
+  load:=>
+    @controls = new Core.Controls()

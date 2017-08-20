@@ -2,7 +2,7 @@ class window.Component.Menu
   constructor:->
     @cursor = new Component.MenuCursor()
   create:=>
-    @sprite = game.add.sprite 40, 40, 'main_menu'
+    @sprite = game.add.sprite 40, 40, 'menu'
     @cursor.create @, 26, 39, [
       @mode_1p_vs_2p_local
       @mode_1p_vs_2p_online
