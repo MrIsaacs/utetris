@@ -175,7 +175,6 @@ class window.Component.Playfield
     i = _f.xy_2_i x, y
     if @stack[i].is_swappable() && @stack[i+1].is_swappable()
       @stack[i].swap()
-      @sfx_swap.play()
   # Checks if the current chain is over.
   # returns a boolean
   chainOver:=>

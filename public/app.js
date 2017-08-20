@@ -105478,8 +105478,7 @@ PIXI.TextureSilentFail = true;
       var i;
       i = _f.xy_2_i(x, y);
       if (this.stack[i].is_swappable() && this.stack[i + 1].is_swappable()) {
-        this.stack[i].swap();
-        return this.sfx_swap.play();
+        return this.stack[i].swap();
       }
     };
 
@@ -106113,6 +106112,9 @@ PIXI.TextureSilentFail = true;
       this.right.set_animation();
       this.right.chain = false;
       this.chain = false;
+      if (!(this.i === null && this.right.i === null)) {
+        this.playfield.sfx_swap.play();
+      }
       if (this.i === null) {
         this.state = SWAP;
         this.counter = 0;

@@ -204,6 +204,9 @@ class window.Component.Panel
     @right.chain  = false
     @chain        = false
 
+    unless @i is null && @right.i is null
+      @playfield.sfx_swap.play()
+
     if @i is null
       @state   = SWAP
       @counter = 0
