@@ -6,7 +6,6 @@ class window.Component.MenuPauseCursor
     @sprite = game.make.sprite @x, @y+(@index*UNIT), 'menu_pause_cursor'
     @menu.sprite.addChild @sprite
   map_controls:=>
-    console.log 'mapping menu paused', @menu.playfield.pi
     _d.controls.map @menu.playfield.pi,
       up   : @up
       down : @down

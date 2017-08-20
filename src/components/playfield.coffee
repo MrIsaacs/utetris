@@ -288,3 +288,5 @@ class window.Component.Playfield
       lift = @y + (@pushCounter / @pushTime * UNIT)
       @layer_block.y  = lift
       @layer_cursor.y = lift
+  shutdown:=>
+    @cursor.sprite.destroy()

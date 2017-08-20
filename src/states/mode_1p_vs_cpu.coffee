@@ -24,7 +24,11 @@ class controller
 
     @playfield1.render()
     #@playfield2.render()
+  shutdown:=>
+    @msx_stage.stop()
+    @playfield1.shutdown()
 ctrl = new controller()
 _states.mode_1p_vs_cpu =
-  create: ctrl.create
-  update: ctrl.update
+  create   : ctrl.create
+  update   : ctrl.update
+  shutdown : ctrl.shutdown

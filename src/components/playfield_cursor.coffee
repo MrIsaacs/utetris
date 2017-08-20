@@ -10,12 +10,10 @@ class window.Component.PlayfieldCursor
   create:(@playfield,opts={})=>
     @counter = 0
 
-
     @sfx_select = game.add.audio 'sfx_select'
 
     # center the cursor
     @ai = opts.ai || false
-    console.log 'ai', @ai
 
     @x = 2
     @y = 6
@@ -36,7 +34,6 @@ class window.Component.PlayfieldCursor
       b    : @swap
       start: @pause
   pause:=>
-    console.log 'pause'
     @playfield.pause()
   up:=>
     return unless @playfield.running

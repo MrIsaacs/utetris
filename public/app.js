@@ -105165,7 +105165,6 @@ PIXI.TextureSilentFail = true;
     };
 
     MenuPauseCursor.prototype.map_controls = function() {
-      console.log('mapping menu paused', this.menu.playfield.pi);
       return _d.controls.map(this.menu.playfield.pi, {
         up: this.up,
         down: this.down,
@@ -105246,6 +105245,7 @@ PIXI.TextureSilentFail = true;
 
     function Playfield(pi) {
       this.pi = pi;
+      this.shutdown = bind(this.shutdown, this);
       this.panel_i = bind(this.panel_i, this);
       this.update_newline = bind(this.update_newline, this);
       this.update_stack = bind(this.update_stack, this);
@@ -105668,6 +105668,10 @@ PIXI.TextureSilentFail = true;
       }
     };
 
+    Playfield.prototype.shutdown = function() {
+      return this.cursor.sprite.destroy();
+    };
+
     return Playfield;
 
   })();
@@ -105715,7 +105719,6 @@ PIXI.TextureSilentFail = true;
       this.counter = 0;
       this.sfx_select = game.add.audio('sfx_select');
       this.ai = opts.ai || false;
-      console.log('ai', this.ai);
       this.x = 2;
       this.y = 6;
       diff = (UNIT / 16) * 3;
@@ -105738,7 +105741,6 @@ PIXI.TextureSilentFail = true;
     };
 
     PlayfieldCursor.prototype.pause = function() {
-      console.log('pause');
       return this.playfield.pause();
     };
 
@@ -106457,6 +106459,7 @@ PIXI.TextureSilentFail = true;
 
   controller = (function() {
     function controller() {
+      this.shutdown = bind(this.shutdown, this);
       this.update = bind(this.update, this);
       this.create = bind(this.create, this);
       this.create_frame = bind(this.create_frame, this);
@@ -106493,6 +106496,11 @@ PIXI.TextureSilentFail = true;
       return this.playfield1.render();
     };
 
+    controller.prototype.shutdown = function() {
+      this.msx_stage.stop();
+      return this.playfield1.shutdown();
+    };
+
     return controller;
 
   })();
@@ -106501,7 +106509,8 @@ PIXI.TextureSilentFail = true;
 
   _states.mode_1p_vs_cpu = {
     create: ctrl.create,
-    update: ctrl.update
+    update: ctrl.update,
+    shutdown: ctrl.shutdown
   };
 
 }).call(this);
