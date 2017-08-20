@@ -26,7 +26,7 @@ class window.Component.Playfield
     @score_lbl  = new Component.Score()
     @blank      = new Component.Panel()
     @ai         = new Component.Ai()
-  create:(opts={})=>
+  create:(@stage,opts={})=>
     @sfx_swap  = game.add.audio 'sfx_swap'
 
     @should_push = opts.push || false
@@ -41,15 +41,8 @@ class window.Component.Playfield
     @layer_block.x  = @x
     @layer_block.y  = @y
 
-    @layer_cursor = game.add.group()
-    @layer_cursor.x = @x
-    @layer_cursor.y = @y
-
     @create_stack   opts.panels
     @create_newline 'unique'
-
-    @cursor.create @, ai: @has_ai
-    @ai.create @, @cursor if @has_ai
 
     @score       = 0
     @chain       = 0
@@ -62,9 +55,15 @@ class window.Component.Playfield
 
     @update_neighbors()
 
-    @render()
     @running = true
     return
+  create_cursor:=>
+    @layer_cursor = game.add.group()
+    @layer_cursor.x = @x
+    @layer_cursor.y = @y
+
+    @cursor.create @, ai: @has_ai
+    @ai.create @, @cursor if @has_ai
   create_stack:(data)=>
     @stack = @new_panels ROWS
     if data
@@ -72,9 +71,10 @@ class window.Component.Playfield
     else
       @fill_panels @stack, 4, 'unique'
   push:=>
-    if @is_danger()
+    if @is_dead()
       @game_over()
       return 0
+
     stack = new Array PANELS
     for i in [COLS...PANELS]
       stack[i-COLS] = @stack[i]
@@ -182,9 +182,13 @@ class window.Component.Playfield
     for panel in @stack
       chain = false if panel.chain
     chain
-  #Checks if any block sprites are close to the top of the grid.
-  # cols is the distance to the top.
   is_danger:=>
+    offset = COLS*3
+    for i in [0...COLS]
+      if @stack[offset+i] && @stack[offset+i].i >= 0 && @stack[offset+i].i != null
+        return true 
+    false
+  is_dead:=>
     for i in [0...COLS]
       if @stack[i] && @stack[i].i >= 0 && @stack[i].i != null
         return true 
@@ -198,6 +202,8 @@ class window.Component.Playfield
   # updates the sprites to the correct locations in the canvas.
   ###
   tick_push:=>
+    @stage.tick_danger(@is_danger())
+
     if _d.controls.keys["pl#{@pi}_l"].isDown ||
        _d.controls.keys["pl#{@pi}_r"].isDown &&
        @running
@@ -217,7 +223,7 @@ class window.Component.Playfield
     cnc = @update_chain_and_combo()
     if @chain
       if @chainOver()
-        console.log 'chain over'
+        #console.log 'chain over'
         @chain = 0
 
     @score_current cnc
@@ -254,15 +260,15 @@ class window.Component.Playfield
         0
   score_current:(cnc)=>
     if cnc[0] > 0
-      console.log 'combo is ', cnc
+      #console.log 'combo is ', cnc
       @score += cnc[0] * 10
       @score += @score_combo(cnc[0])
       if cnc[1]
         @chain++
-        console.log 'chain is ', @chain + 1
+        #console.log 'chain is ', @chain + 1
       if @chain
         @score += @score_chain(@chain + 1)
-      console.log 'Score: ', @score
+      #console.log 'Score: ', @score
   update_stack:=>
     for panel in @stack
       panel.render()

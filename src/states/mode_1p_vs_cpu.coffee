@@ -9,15 +9,31 @@ class controller
   create:=>
     game.stage.backgroundColor = 0x000000
 
-    @msx_stage = game.add.audio 'msx_stage'
+    @danger = false
+    @msx_stage          = game.add.audio 'msx_stage'
+    @msx_stage_critical = game.add.audio 'msx_stage_critical'
     @msx_stage.play()
 
     offset = 89
     @create_bg()
-    @playfield1.create push: true, x: offset+8, y: 8
-    #@playfield2.create push: true, x: offset+152, y: 8
+    @playfield1.create @, push: true, x: offset+8, y: 8
+    #@playfield2.create @, push: true, x: offset+152, y: 8
     @create_frame(offset)
-
+    @playfield1.create_cursor()
+    #@playfield2.create_cursor()
+    @playfield1.render()
+    #@playfield2.render()
+  tick_danger:(is_danger)=>
+    if is_danger
+      if @danger is false
+        @msx_stage.stop()
+        @msx_stage_critical.play()
+      @danger = true
+    else
+      if @danger is true
+        @msx_stage_critical.stop()
+        @msx_stage.play()
+      @danger = false
   update:=>
     @playfield1.tick()
     #@playfield2.tick()

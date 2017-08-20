@@ -121,7 +121,7 @@ class window.Component.Panel
           @state = STATIC
           @chain = false
         else if @under.state is HANG
-          console.log 'H', @x, @y
+          #console.log 'H', @x, @y
           @state   = HANG
           @counter = @under.counter
           @chain   = @under.chain
@@ -133,7 +133,7 @@ class window.Component.Panel
       when HANG
         @state = FALL
       when FALL
-        console.log 'FALLING', @x, @y
+        #console.log 'FALLING', @x, @y
         if @under.is_empty()
           @fall()
         else if @under.state is CLEAR
