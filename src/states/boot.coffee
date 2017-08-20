@@ -48,6 +48,12 @@ class controller
     game.load.audio 'sfx_select' , './sfx_select.mp3'
     game.load.audio 'sfx_swap'   , './sfx_swap.mp3'
 
+
+    game.load.image 'mini_cursor', './mini_cursor.png'
+    game.load.image 'mini_menu'  , './mini_menu.png'
+    game.load.image 'pause'      , './pause.png'
+    game.load.image 'countdown'  , './countdown.png'
+
     game.load.image 'bg_blue', './bg_blue.png'
 
     game.load.image 'main_menu'  , './main_menu.png'

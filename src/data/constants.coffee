@@ -28,6 +28,8 @@ window.UNIT = 16
 window.WIN_WIDTH  = 434 #256
 window.WIN_HEIGHT = 224
 
+window.MENUCURSORBLINK = 12
+
 # Animation timing - These aren't being used
 window.ANIM_SWAPTIME       = 4
 window.ANIM_LANDTIME       = 0

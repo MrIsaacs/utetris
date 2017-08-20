@@ -104846,6 +104846,8 @@ PIXI.TextureSilentFail = true;
 
   window.WIN_HEIGHT = 224;
 
+  window.MENUCURSORBLINK = 12;
+
   window.ANIM_SWAPTIME = 4;
 
   window.ANIM_LANDTIME = 0;
@@ -104917,6 +104919,8 @@ PIXI.TextureSilentFail = true;
       this.x = x;
       this.y = y;
       this.menu_items = menu_items;
+      this.sfx_select = game.add.audio('sfx_select');
+      this.counter = 0;
       this.index = 0;
       this.sprite = game.make.sprite(this.x, this.y + (this.index * UNIT), 'menu_cursor');
       this.menu.sprite.addChild(this.sprite);
@@ -104940,17 +104944,28 @@ PIXI.TextureSilentFail = true;
     };
 
     MenuCursor.prototype.update = function() {
-      return this.sprite.y = this.y + (this.index * UNIT);
+      this.sprite.y = this.y + (this.index * UNIT);
+      this.counter++;
+      if (this.counter > MENUCURSORBLINK) {
+        this.counter = 0;
+        return this.sprite.visible = !this.sprite.visible;
+      }
     };
 
     MenuCursor.prototype.up = function() {
       if (this.index !== 0) {
+        this.sfx_select.play();
+        this.counter = 0;
+        this.sprite.visible = true;
         return this.index--;
       }
     };
 
     MenuCursor.prototype.down = function() {
       if (this.index !== this.menu_items.length - 1) {
+        this.sfx_select.play();
+        this.counter = 0;
+        this.sprite.visible = true;
         return this.index++;
       }
     };
@@ -106112,6 +106127,10 @@ PIXI.TextureSilentFail = true;
       game.load.audio('msx_stage_critical', './msx_stage_critical.mp3');
       game.load.audio('sfx_select', './sfx_select.mp3');
       game.load.audio('sfx_swap', './sfx_swap.mp3');
+      game.load.image('mini_cursor', './mini_cursor.png');
+      game.load.image('mini_menu', './mini_menu.png');
+      game.load.image('pause', './pause.png');
+      game.load.image('countdown', './countdown.png');
       game.load.image('bg_blue', './bg_blue.png');
       game.load.image('main_menu', './main_menu.png');
       game.load.image('menu_cursor', './menu_cursor.png');
