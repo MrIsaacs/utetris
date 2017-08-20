@@ -105112,6 +105112,7 @@ PIXI.TextureSilentFail = true;
     };
 
     MenuPause.prototype.cancel = function() {
+      this.paused = false;
       return game.state.start('menu');
     };
 
@@ -105669,7 +105670,7 @@ PIXI.TextureSilentFail = true;
     };
 
     Playfield.prototype.shutdown = function() {
-      return this.cursor.sprite.destroy();
+      return this.cursor.shutdown();
     };
 
     return Playfield;
@@ -105683,6 +105684,7 @@ PIXI.TextureSilentFail = true;
 
   window.Component.PlayfieldCursor = (function() {
     function PlayfieldCursor() {
+      this.shutdown = bind(this.shutdown, this);
       this.update = bind(this.update, this);
       this.swap = bind(this.swap, this);
       this.right = bind(this.right, this);
@@ -105694,33 +105696,18 @@ PIXI.TextureSilentFail = true;
       this.create = bind(this.create, this);
     }
 
-    PlayfieldCursor.prototype.x = null;
-
-    PlayfieldCursor.prototype.y = null;
-
-    PlayfieldCursor.prototype.left = null;
-
-    PlayfieldCursor.prototype.right = null;
-
-    PlayfieldCursor.prototype.sprite = null;
-
-    PlayfieldCursor.prototype.game = null;
-
-    PlayfieldCursor.prototype.controls = null;
-
-    PlayfieldCursor.prototype.animating_start_pos = true;
-
     PlayfieldCursor.prototype.create = function(playfield, opts) {
       var diff;
       this.playfield = playfield;
       if (opts == null) {
         opts = {};
       }
-      this.counter = 0;
       this.sfx_select = game.add.audio('sfx_select');
-      this.ai = opts.ai || false;
+      this.animating_start_pos = true;
+      this.counter = 0;
       this.x = 2;
       this.y = 6;
+      this.ai = opts.ai || false;
       diff = (UNIT / 16) * 3;
       this.sprite = game.make.sprite(((COLS - 2) * UNIT) - diff, 0 - diff, 'playfield_cursor', 0);
       this.sprite.animations.add('idle', [0, 1]);
@@ -105814,6 +105801,10 @@ PIXI.TextureSilentFail = true;
         this.sprite.x = (this.x * UNIT) - diff;
         return this.sprite.y = (y * UNIT) - diff;
       }
+    };
+
+    PlayfieldCursor.prototype.shutdown = function() {
+      return console.log('shutdown cursor');
     };
 
     return PlayfieldCursor;
@@ -106465,7 +106456,6 @@ PIXI.TextureSilentFail = true;
       this.create_frame = bind(this.create_frame, this);
       this.create_bg = bind(this.create_bg, this);
       this.playfield1 = new Component.Playfield(1);
-      this.playfield2 = new Component.Playfield(2);
     }
 
     controller.prototype.create_bg = function() {

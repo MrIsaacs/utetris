@@ -10,6 +10,7 @@ class window.Component.MenuPause
       @cancel
     ]
   cancel:=>
+    @paused = false
     game.state.start 'menu'
   contiune:=>
     @paused         = false

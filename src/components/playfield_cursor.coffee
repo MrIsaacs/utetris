@@ -1,22 +1,14 @@
 class window.Component.PlayfieldCursor
-  x          : null
-  y          : null
-  left       : null
-  right      : null
-  sprite     : null
-  game       : null
-  controls   : null
-  animating_start_pos: true
   create:(@playfield,opts={})=>
-    @counter = 0
-
     @sfx_select = game.add.audio 'sfx_select'
+
+    @animating_start_pos = true
+    @counter             = 0
+    @x = 2
+    @y = 6
 
     # center the cursor
     @ai = opts.ai || false
-
-    @x = 2
-    @y = 6
 
     diff = (UNIT / 16) * 3
     @sprite = game.make.sprite ((COLS-2)*UNIT)-diff, 0-diff, 'playfield_cursor', 0
@@ -72,3 +64,5 @@ class window.Component.PlayfieldCursor
       y = if @playfield.should_push then @y else @y+1
       @sprite.x = (@x * UNIT) - diff
       @sprite.y = (y * UNIT)  - diff
+  shutdown:=>
+    console.log 'shutdown cursor'

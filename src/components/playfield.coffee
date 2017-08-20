@@ -289,4 +289,4 @@ class window.Component.Playfield
       @layer_block.y  = lift
       @layer_cursor.y = lift
   shutdown:=>
-    @cursor.sprite.destroy()
+    @cursor.shutdown()

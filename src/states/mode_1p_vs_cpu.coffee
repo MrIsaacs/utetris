@@ -1,7 +1,7 @@
 class controller
   constructor:->
     @playfield1 = new Component.Playfield(1)
-    @playfield2 = new Component.Playfield(2)
+    #@playfield2 = new Component.Playfield(2)
   create_bg:=>
     @bg = game.add.sprite 0,0, 'playfield_vs_bg'
   create_frame:(offset)=>
