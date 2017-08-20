@@ -42,12 +42,16 @@ class controller
     game.renderer.renderSession.roundPixels = true
     Phaser.Canvas.setImageRenderingCrisp(game.canvas)
 
-    #game.load.audio 'sizzle'   , './sizzle.mp3'
-    #game.load.image 'splash', './splash.png'
-    #game.load.image 'titlescreen', './titlescreen.jpg'
+    game.load.audio 'msx_stage'         , './msx_stage.mp3'
+    game.load.audio 'msx_stage_critical', './msx_stage_critical.mp3'
+
+    game.load.audio 'sfx_select' , './sfx_select.mp3'
+    game.load.audio 'sfx_swap'   , './sfx_swap.mp3'
+
     game.load.image 'bg_blue', './bg_blue.png'
 
-    game.load.image 'button_menu', './button_menu.png'
+    game.load.image 'main_menu'  , './main_menu.png'
+    game.load.image 'menu_cursor', './menu_cursor.png'
 
     game.load.image 'vs_frame', './vs_frame.png'
     game.load.image 'vs_bg'   , './vs_bg.png'

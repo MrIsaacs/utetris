@@ -27,6 +27,8 @@ class window.Component.Playfield
     @g.drawRect 0, 0, @width, @height
     @g.endFill()
   create:(opts={})=>
+    @sfx_swap = game.add.audio 'sfx_swap'
+
     @should_push = opts.push || false
 
     @height = (ROWS+1) * UNIT
@@ -181,6 +183,7 @@ class window.Component.Playfield
     i = _f.xy_2_i x, y
     if @stack[i].is_swappable() && @stack[i+1].is_swappable()
       @stack[i].swap()
+      @sfx_swap.play()
   # Checks if the current chain is over.
   # returns a boolean
   chainOver:=>

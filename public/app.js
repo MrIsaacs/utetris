@@ -104897,68 +104897,130 @@ PIXI.TextureSilentFail = true;
 (function() {
   var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-  window.Component.ButtonMenu = (function() {
-    function ButtonMenu(key) {
-      this.key = key;
-      this.onout = bind(this.onout, this);
-      this.onover = bind(this.onover, this);
-      this.onclick = bind(this.onclick, this);
+  window.Component.MenuCursor = (function() {
+    function MenuCursor() {
+      this.btn_r = bind(this.btn_r, this);
+      this.btn_l = bind(this.btn_l, this);
+      this.btn_b = bind(this.btn_b, this);
+      this.btn_a = bind(this.btn_a, this);
+      this.right = bind(this.right, this);
+      this.left = bind(this.left, this);
+      this.down = bind(this.down, this);
+      this.up = bind(this.up, this);
+      this.update = bind(this.update, this);
+      this.create_controls = bind(this.create_controls, this);
       this.create = bind(this.create, this);
     }
 
-    ButtonMenu.prototype.create = function(x, y, xx, text) {
-      this.lbl = game.make.text(xx, -20, text, {
-        font: '28px Arial',
-        fill: '#074c62',
-        align: 'center',
-        fontWeight: 'bold',
-        fontStyle: 'italic'
-      });
-      this.sprite = game.add.sprite(x, y, "button_menu");
-      this.sprite.scale.setTo(_rez.scale);
-      this.sprite.anchor.setTo(0.5);
-      this.sprite.inputEnabled = true;
-      this.sprite.events.onInputOut.add(this.onout, this);
-      this.sprite.events.onInputOver.add(this.onover, this);
-      this.sprite.events.onInputUp.add(this.onclick, this);
-      return this.sprite.addChild(this.lbl);
+    MenuCursor.prototype.create = function(menu, x, y, menu_items) {
+      this.menu = menu;
+      this.x = x;
+      this.y = y;
+      this.menu_items = menu_items;
+      this.index = 0;
+      this.sprite = game.make.sprite(this.x, this.y + (this.index * UNIT), 'menu_cursor');
+      this.menu.sprite.addChild(this.sprite);
+      return this.create_controls();
     };
 
-    ButtonMenu.prototype.onclick = function() {
-      switch (this.key) {
-        case 'mode_1p_vs_cpu':
-          return game.state.start('mode_1p_vs_cpu');
-        case 'mode_1p_vs_2p':
-          return game.state.start('mode_1p_vs_2p');
-        case 'mode_puzzles':
-          window.puzzle = _d.puzzles.skill_chain_demo_2.demo_4;
-          return game.state.start('mode_puzzle');
+    MenuCursor.prototype.create_controls = function() {
+      this.controls = game.input.keyboard.createCursorKeys();
+      this.controls.btn_a = game.input.keyboard.addKey(Phaser.Keyboard.X);
+      this.controls.btn_b = game.input.keyboard.addKey(Phaser.Keyboard.Z);
+      this.controls.btn_l = game.input.keyboard.addKey(Phaser.Keyboard.C);
+      this.controls.btn_r = game.input.keyboard.addKey(Phaser.Keyboard.C);
+      this.controls.up.onDown.add(this.up, this);
+      this.controls.down.onDown.add(this.down, this);
+      this.controls.left.onDown.add(this.left, this);
+      this.controls.right.onDown.add(this.right, this);
+      this.controls.btn_a.onDown.add(this.btn_a, this);
+      this.controls.btn_b.onDown.add(this.btn_b, this);
+      this.controls.btn_l.onDown.add(this.btn_l, this);
+      return this.controls.btn_r.onDown.add(this.btn_r, this);
+    };
+
+    MenuCursor.prototype.update = function() {
+      return this.sprite.y = this.y + (this.index * UNIT);
+    };
+
+    MenuCursor.prototype.up = function() {
+      if (this.index !== 0) {
+        return this.index--;
       }
     };
 
-    ButtonMenu.prototype.onover = function() {
-      var s, tween;
-      s = _rez.scale + 0.04;
-      tween = game.add.tween(this.sprite.scale);
-      tween.to({
-        x: s,
-        y: s
-      }, 70, Phaser.Easing.Linear.None);
-      return tween.start();
+    MenuCursor.prototype.down = function() {
+      if (this.index !== this.menu_items.length - 1) {
+        return this.index++;
+      }
     };
 
-    ButtonMenu.prototype.onout = function() {
-      var s, tween;
-      s = _rez.scale;
-      tween = game.add.tween(this.sprite.scale);
-      tween.to({
-        x: s,
-        y: s
-      }, 70, Phaser.Easing.Linear.None);
-      return tween.start();
+    MenuCursor.prototype.left = function() {};
+
+    MenuCursor.prototype.right = function() {
+      return this.menu_items[this.index]();
     };
 
-    return ButtonMenu;
+    MenuCursor.prototype.btn_a = function() {
+      return this.menu_items[this.index]();
+    };
+
+    MenuCursor.prototype.btn_b = function() {};
+
+    MenuCursor.prototype.btn_l = function() {};
+
+    MenuCursor.prototype.btn_r = function() {};
+
+    return MenuCursor;
+
+  })();
+
+}).call(this);
+
+(function() {
+  var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  window.Component.Menu = (function() {
+    function Menu() {
+      this.mode_option = bind(this.mode_option, this);
+      this.mode_improve = bind(this.mode_improve, this);
+      this.mode_1p_vs_cpu = bind(this.mode_1p_vs_cpu, this);
+      this.mode_1p_vs_2p_online = bind(this.mode_1p_vs_2p_online, this);
+      this.mode_1p_vs_2p_local = bind(this.mode_1p_vs_2p_local, this);
+      this.update = bind(this.update, this);
+      this.create = bind(this.create, this);
+      this.cursor = new Component.MenuCursor();
+    }
+
+    Menu.prototype.create = function() {
+      this.sprite = game.add.sprite(40, 40, 'main_menu');
+      return this.cursor.create(this, 26, 39, [this.mode_1p_vs_2p_local, this.mode_1p_vs_2p_online, this.mode_1p_vs_cpu, this.mode_improve, this.mode_option]);
+    };
+
+    Menu.prototype.update = function() {
+      return this.cursor.update();
+    };
+
+    Menu.prototype.mode_1p_vs_2p_local = function() {
+      return game.state.start('mode_1p_vs_2p_local');
+    };
+
+    Menu.prototype.mode_1p_vs_2p_online = function() {
+      return game.state.start('mode_1p_vs_2p_online');
+    };
+
+    Menu.prototype.mode_1p_vs_cpu = function() {
+      return game.state.start('mode_1p_vs_cpu');
+    };
+
+    Menu.prototype.mode_improve = function() {
+      window.puzzle = _d.puzzles.skill_chain_demo_2.demo_4;
+      return game.state.start('mode_puzzle');
+    };
+
+    Menu.prototype.mode_option = function() {};
+
+    return Menu;
 
   })();
 
@@ -104999,6 +105061,7 @@ PIXI.TextureSilentFail = true;
       if (opts == null) {
         opts = {};
       }
+      this.sfx_select = game.add.audio('sfx_select');
       this.ai = opts.ai || false;
       console.log('ai', this.ai);
       this.x = Math.floor(COLS / 2) - 1;
@@ -105049,6 +105112,7 @@ PIXI.TextureSilentFail = true;
       if (!this.playfield.running) {
         return;
       }
+      this.sfx_select.play();
       if (this.x > 0) {
         return this.x--;
       }
@@ -105058,6 +105122,7 @@ PIXI.TextureSilentFail = true;
       if (!this.playfield.running) {
         return;
       }
+      this.sfx_select.play();
       if (this.x < COLS - 2) {
         return this.x++;
       }
@@ -105067,6 +105132,7 @@ PIXI.TextureSilentFail = true;
       if (!this.playfield.running) {
         return;
       }
+      this.sfx_select.play();
       if (this.y < ROWS - 1) {
         return this.y++;
       }
@@ -105076,6 +105142,7 @@ PIXI.TextureSilentFail = true;
       if (!this.playfield.running) {
         return;
       }
+      this.sfx_select.play();
       if (this.y > 0) {
         return this.y--;
       }
@@ -105163,6 +105230,7 @@ PIXI.TextureSilentFail = true;
       if (opts == null) {
         opts = {};
       }
+      this.sfx_swap = game.add.audio('sfx_swap');
       this.should_push = opts.push || false;
       this.height = (ROWS + 1) * UNIT;
       this.width = COLS * UNIT;
@@ -105354,7 +105422,8 @@ PIXI.TextureSilentFail = true;
       var i;
       i = _f.xy_2_i(x, y);
       if (this.stack[i].is_swappable() && this.stack[i + 1].is_swappable()) {
-        return this.stack[i].swap();
+        this.stack[i].swap();
+        return this.sfx_swap.play();
       }
     };
 
@@ -106039,8 +106108,13 @@ PIXI.TextureSilentFail = true;
       game.scale.setUserScale(3);
       game.renderer.renderSession.roundPixels = true;
       Phaser.Canvas.setImageRenderingCrisp(game.canvas);
+      game.load.audio('msx_stage', './msx_stage.mp3');
+      game.load.audio('msx_stage_critical', './msx_stage_critical.mp3');
+      game.load.audio('sfx_select', './sfx_select.mp3');
+      game.load.audio('sfx_swap', './sfx_swap.mp3');
       game.load.image('bg_blue', './bg_blue.png');
-      game.load.image('button_menu', './button_menu.png');
+      game.load.image('main_menu', './main_menu.png');
+      game.load.image('menu_cursor', './menu_cursor.png');
       game.load.image('vs_frame', './vs_frame.png');
       game.load.image('vs_bg', './vs_bg.png');
       game.load.spritesheet('cursor', './cursor.png', 38, 22, 2);
@@ -106126,21 +106200,13 @@ PIXI.TextureSilentFail = true;
       this.update = bind(this.update, this);
       this.ver = bind(this.ver, this);
       this.create = bind(this.create, this);
-      this.btn_1p_vs_cpu = new Component.ButtonMenu('mode_1p_vs_cpu');
-      this.btn_1p_vs_2p = new Component.ButtonMenu('mode_1p_vs_2p');
-      this.btn_puzzles = new Component.ButtonMenu('mode_puzzles');
+      this.menu = new Component.Menu();
     }
 
     controller.prototype.create = function() {
-      var x, y;
       game.stage.backgroundColor = '#ffffff';
       this.bg = game.add.tileSprite(0, 0, game.world.width, game.world.height, 'bg_blue');
-      console.log('titlescreen');
-      x = WIN_WIDTH / 2;
-      y = WIN_HEIGHT / 2;
-      this.btn_1p_vs_cpu.create(x + rs(40), y - rs(100), -100, '1P VS CPU');
-      this.btn_1p_vs_2p.create(x + rs(40), y + rs(20), -100, '1P VS 2P');
-      this.btn_puzzles.create(x + rs(40), y + rs(140), -100, 'Puzzles');
+      this.menu.create();
       return this.ver();
     };
 
@@ -106160,6 +106226,7 @@ PIXI.TextureSilentFail = true;
     };
 
     controller.prototype.update = function() {
+      this.menu.update();
       this.bg.tilePosition.y += 0.5;
       return this.bg.tilePosition.x -= 0.5;
     };
@@ -106202,6 +106269,8 @@ PIXI.TextureSilentFail = true;
     controller.prototype.create = function() {
       var offset;
       game.stage.backgroundColor = 0x000000;
+      this.msx_stage = game.add.audio('msx_stage');
+      this.msx_stage.play();
       offset = 89;
       this.create_bg();
       this.playfield1.create({
@@ -106209,19 +106278,12 @@ PIXI.TextureSilentFail = true;
         x: offset + 8,
         y: 8
       });
-      this.playfield2.create({
-        push: true,
-        x: offset + 152,
-        y: 8
-      });
       return this.create_frame(offset);
     };
 
     controller.prototype.update = function() {
       this.playfield1.tick();
-      this.playfield2.tick();
-      this.playfield1.render();
-      return this.playfield2.render();
+      return this.playfield1.render();
     };
 
     return controller;
@@ -106251,9 +106313,9 @@ PIXI.TextureSilentFail = true;
     controller.prototype.create = function() {
       var scale, unit, x;
       game.stage.backgroundColor = 0x000000;
-      unit = game.stage.height / (WIN_HEIGHT / WIN_UNIT);
-      scale = unit / WIN_UNIT;
-      x = (game.stage.width / 2) - ((scale * WIN_WIDTH) / 2);
+      unit = game.stage.height / (WIN_HEIGHT / UNIT);
+      scale = unit / UNIT;
+      x = (game.stage.width / 2) - ((scale * UNIT) / 2);
       console.log('puzzle', _d.puzzles.skill_chain_demo_2.demo_4);
       return this.playfield.create({
         push: false,
@@ -106293,6 +106355,10 @@ PIXI.TextureSilentFail = true;
   game.state.add('load', _states.load);
 
   game.state.add('menu', _states.menu);
+
+  game.state.add('mode_1p_vs_2p_local', _states.mode_1p_vs_cpu);
+
+  game.state.add('mode_1p_vs_2p_online', _states.mode_1p_vs_cpu);
 
   game.state.add('mode_1p_vs_cpu', _states.mode_1p_vs_cpu);
 

@@ -24,7 +24,8 @@ js_app = [
 
   './src/components/ai.coffee'
 
-  './src/components/button_menu.coffee'
+  './src/components/menu_cursor.coffee'
+  './src/components/menu.coffee'
 
   './src/components/cursor.coffee'
   './src/components/playfield.coffee'

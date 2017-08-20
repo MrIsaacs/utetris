@@ -7,6 +7,8 @@ class window.Component.Cursor
   game       : null
   controls   : null
   create:(@playfield,opts={})=>
+    @sfx_select = game.add.audio 'sfx_select'
+
     # center the cursor
     @ai = opts.ai || false
     console.log 'ai', @ai
@@ -29,8 +31,7 @@ class window.Component.Cursor
   create_controls:=>
     @controls      = game.input.keyboard.createCursorKeys()
     @controls.swap = game.input.keyboard.addKey Phaser.Keyboard.X
-    if @playfield.should_push
-      @controls.push = game.input.keyboard.addKey Phaser.Keyboard.C
+    @controls.push = game.input.keyboard.addKey Phaser.Keyboard.C if @playfield.should_push
     @controls.left.onDown.add  @mv_left , @
     @controls.right.onDown.add @mv_right, @
     @controls.down.onDown.add  @mv_down , @
@@ -46,13 +47,17 @@ class window.Component.Cursor
     @playfield.swap @x, @y
   mv_left:=>
     return unless @playfield.running
+    @sfx_select.play()
     @x-- if @x > 0
   mv_right:(cursor)=>
     return unless @playfield.running
+    @sfx_select.play()
     @x++ if @x < COLS - 2
   mv_down:(cursor)=>
     return unless @playfield.running
+    @sfx_select.play()
     @y++ if @y < ROWS - 1
   mv_up:(cursor)=>
     return unless @playfield.running
+    @sfx_select.play()
     @y-- if @y > 0
