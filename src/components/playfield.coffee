@@ -53,10 +53,7 @@ class window.Component.Playfield
     @score_lbl.create()
     @blank.create @, null, null, true
 
-    @update_neighbors()
-
     @running = true
-    return
   create_cursor:=>
     @layer_cursor = game.add.group()
     @layer_cursor.x = @x
@@ -141,22 +138,9 @@ class window.Component.Playfield
           when 'random' then stack[i].set 'random'
           else
             stack[i].set mode[i]
-  # Updates the neighbor references in each block in the grid.
-  update_neighbors:=>
+  update_panels:=>
     for panel,i in @stack
-      panel.left  = if ((i+1) % COLS) is 1  then @blank else @stack[i-1]
-      panel.right = if ((i+1) % COLS) is 0  then @blank else @stack[i+1]
-      panel.under = if i+1 >= (PANELS-COLS) then @blank else @stack[i+COLS]
-      panel.above = if i+1 <= COLS          then @blank else @stack[i-COLS]
-  # Updates the state of the grid.
-  # Blocks are only dependent on the state of their under-neighbor, so
-  # this can be done from the bottom up.
-  update_panels_state:=>
-    for panel,i in @stack
-      [x,y] = _f.i_2_xy(i)
-      panel.update_state()
-      panel.x = x
-      panel.y = y
+      panel.update i, @is_danger()
   # Update the combos and chain for the entire grid.
   # Returns [combo, chain] where
   # combo is the amount of blocks participating in the combo
@@ -183,11 +167,15 @@ class window.Component.Playfield
       chain = false if panel.chain
     chain
   is_danger:=>
-    offset = COLS*3
+    offset = COLS*2
+    cols  = []
     for i in [0...COLS]
       if @stack[offset+i] && @stack[offset+i].i >= 0 && @stack[offset+i].i != null
-        return true 
-    false
+        cols.push i
+    if cols.length > 0
+      cols
+    else
+      false
   is_dead:=>
     for i in [0...COLS]
       if @stack[i] && @stack[i].i >= 0 && @stack[i].i != null
@@ -216,8 +204,7 @@ class window.Component.Playfield
   tick:=>
     return unless @running
     @tick_push() if @should_push
-    @update_neighbors()
-    @update_panels_state()
+    @update_panels()
     @ai.update() if @has_ai
     # combo n chain
     cnc = @update_chain_and_combo()

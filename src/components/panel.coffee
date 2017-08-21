@@ -15,8 +15,9 @@ class window.Component.Panel
   i                 : null
 
   create:(@playfield, @x, @y, blank=false)=>
-    @state = STATIC
-    @chain = false
+    @danger = false
+    @state  = STATIC
+    @chain  = false
     @set_blank() if blank
 
     @sprite = game.make.sprite 0, 0, 'panels', @frame(0)
@@ -76,7 +77,7 @@ class window.Component.Panel
   play_clear:=>  @sprite.animations.play 'clear', game.time.desiredFps, false
   play_live:=>   @sprite.animations.play 'live'
   play_dead:=>   @sprite.animations.play 'dead'
-  play_danger:=> @sprite.animations.play 'danger'
+  play_danger:=> @sprite.animations.play 'danger', game.time.desiredFps/3, true
   play_face:=>   @sprite.animations.play 'face'
   set_animation:=>
     @sprite.frame = @frame(0)
@@ -266,3 +267,23 @@ class window.Component.Panel
     combo  += panel2[0]
     chain   = true if middle[1] or panel1[1] or panel2[1]
     [combo,chain]
+  update:(i,is_danger)=>
+    [x,y] = _f.i_2_xy(i)
+    if is_danger && is_danger.indexOf(x) != -1
+      if @danger is false
+        @play_danger()
+      @danger = true
+    else
+      if @danger is true
+        @play_live()
+      @danger = false
+
+    @left  = if ((i+1) % COLS) is 1  then @playfield.blank else @playfield.stack[i-1]
+    @right = if ((i+1) % COLS) is 0  then @playfield.blank else @playfield.stack[i+1]
+    @under = if i+1 >= (PANELS-COLS) then @playfield.blank else @playfield.stack[i+COLS]
+    @above = if i+1 <= COLS          then @playfield.blank else @playfield.stack[i-COLS]
+
+    @update_state()
+    @x = x
+    @y = y
+

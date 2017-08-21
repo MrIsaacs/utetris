@@ -105258,8 +105258,7 @@ PIXI.TextureSilentFail = true;
       this.chainOver = bind(this.chainOver, this);
       this.swap = bind(this.swap, this);
       this.update_chain_and_combo = bind(this.update_chain_and_combo, this);
-      this.update_panels_state = bind(this.update_panels_state, this);
-      this.update_neighbors = bind(this.update_neighbors, this);
+      this.update_panels = bind(this.update_panels, this);
       this.fill_panels = bind(this.fill_panels, this);
       this.new_panels = bind(this.new_panels, this);
       this.game_over = bind(this.game_over, this);
@@ -105300,8 +105299,7 @@ PIXI.TextureSilentFail = true;
       this.menu_pause.create(this);
       this.score_lbl.create();
       this.blank.create(this, null, null, true);
-      this.update_neighbors();
-      this.running = true;
+      return this.running = true;
     };
 
     Playfield.prototype.create_cursor = function() {
@@ -105435,30 +105433,13 @@ PIXI.TextureSilentFail = true;
       }
     };
 
-    Playfield.prototype.update_neighbors = function() {
+    Playfield.prototype.update_panels = function() {
       var i, j, len, panel, ref, results;
       ref = this.stack;
       results = [];
       for (i = j = 0, len = ref.length; j < len; i = ++j) {
         panel = ref[i];
-        panel.left = ((i + 1) % COLS) === 1 ? this.blank : this.stack[i - 1];
-        panel.right = ((i + 1) % COLS) === 0 ? this.blank : this.stack[i + 1];
-        panel.under = i + 1 >= (PANELS - COLS) ? this.blank : this.stack[i + COLS];
-        results.push(panel.above = i + 1 <= COLS ? this.blank : this.stack[i - COLS]);
-      }
-      return results;
-    };
-
-    Playfield.prototype.update_panels_state = function() {
-      var i, j, len, panel, ref, ref1, results, x, y;
-      ref = this.stack;
-      results = [];
-      for (i = j = 0, len = ref.length; j < len; i = ++j) {
-        panel = ref[i];
-        ref1 = _f.i_2_xy(i), x = ref1[0], y = ref1[1];
-        panel.update_state();
-        panel.x = x;
-        results.push(panel.y = y);
+        results.push(panel.update(i, this.is_danger()));
       }
       return results;
     };
@@ -105501,14 +105482,19 @@ PIXI.TextureSilentFail = true;
     };
 
     Playfield.prototype.is_danger = function() {
-      var i, j, offset, ref;
-      offset = COLS * 3;
+      var cols, i, j, offset, ref;
+      offset = COLS * 2;
+      cols = [];
       for (i = j = 0, ref = COLS; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
         if (this.stack[offset + i] && this.stack[offset + i].i >= 0 && this.stack[offset + i].i !== null) {
-          return true;
+          cols.push(i);
         }
       }
-      return false;
+      if (cols.length > 0) {
+        return cols;
+      } else {
+        return false;
+      }
     };
 
     Playfield.prototype.is_dead = function() {
@@ -105551,8 +105537,7 @@ PIXI.TextureSilentFail = true;
       if (this.should_push) {
         this.tick_push();
       }
-      this.update_neighbors();
-      this.update_panels_state();
+      this.update_panels();
       if (this.has_ai) {
         this.ai.update();
       }
@@ -105748,7 +105733,7 @@ PIXI.TextureSilentFail = true;
         return;
       }
       this.sfx_select.play();
-      if (this.y > 0) {
+      if (this.y > 1) {
         return this.y--;
       }
     };
@@ -105830,6 +105815,7 @@ PIXI.TextureSilentFail = true;
 
   window.Component.Panel = (function() {
     function Panel() {
+      this.update = bind(this.update, this);
       this.check_neighbours = bind(this.check_neighbours, this);
       this.chain_and_combo = bind(this.chain_and_combo, this);
       this.nocombo = bind(this.nocombo, this);
@@ -105886,13 +105872,14 @@ PIXI.TextureSilentFail = true;
 
     Panel.prototype.i = null;
 
-    Panel.prototype.create = function(playfield, x, y1, blank) {
+    Panel.prototype.create = function(playfield, x1, y1, blank) {
       this.playfield = playfield;
-      this.x = x;
+      this.x = x1;
       this.y = y1;
       if (blank == null) {
         blank = false;
       }
+      this.danger = false;
       this.state = STATIC;
       this.chain = false;
       if (blank) {
@@ -105974,7 +105961,7 @@ PIXI.TextureSilentFail = true;
     };
 
     Panel.prototype.play_danger = function() {
-      return this.sprite.animations.play('danger');
+      return this.sprite.animations.play('danger', game.time.desiredFps / 3, true);
     };
 
     Panel.prototype.play_face = function() {
@@ -106204,6 +106191,29 @@ PIXI.TextureSilentFail = true;
         chain = true;
       }
       return [combo, chain];
+    };
+
+    Panel.prototype.update = function(i, is_danger) {
+      var ref, x, y;
+      ref = _f.i_2_xy(i), x = ref[0], y = ref[1];
+      if (is_danger && is_danger.indexOf(x) !== -1) {
+        if (this.danger === false) {
+          this.play_danger();
+        }
+        this.danger = true;
+      } else {
+        if (this.danger === true) {
+          this.play_live();
+        }
+        this.danger = false;
+      }
+      this.left = ((i + 1) % COLS) === 1 ? this.playfield.blank : this.playfield.stack[i - 1];
+      this.right = ((i + 1) % COLS) === 0 ? this.playfield.blank : this.playfield.stack[i + 1];
+      this.under = i + 1 >= (PANELS - COLS) ? this.playfield.blank : this.playfield.stack[i + COLS];
+      this.above = i + 1 <= COLS ? this.playfield.blank : this.playfield.stack[i - COLS];
+      this.update_state();
+      this.x = x;
+      return this.y = y;
     };
 
     return Panel;
