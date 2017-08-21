@@ -18,7 +18,7 @@ class window.Component.Playfield
   pushCounter: 0
   has_ai: false
   running: false
-  land: false # when any panel has landed in the stack
+  land: false # when any panel has landed in the stac
   constructor:(@pi)->
     @menu_pause = new Component.MenuPause()
     @countdown  = new Component.PlayfieldCountdown()
@@ -78,7 +78,7 @@ class window.Component.Playfield
       @fill_panels false, @stack, 5, 'unique'
   push:=>
     if @is_danger(0)
-      @game_over()
+      @stage.game_over()
       return 0
 
     stack = new Array PANELS
@@ -118,9 +118,6 @@ class window.Component.Playfield
       @stack[3].i
       @stack[4].i
       @stack[5].i
-    @stage.msx_stage.stop()
-    @stage.msx_stage_critical.stop()
-    @stage.msx_stage_results.play()
     @pushCounter = 0
     return
   #grid of blocks
@@ -195,8 +192,6 @@ class window.Component.Playfield
   # updates the sprites to the correct locations in the canvas.
   ###
   tick_push:=>
-    @stage.tick_danger(@is_danger(1))
-
     if @cursor.can_push()
       @pushCounter -= 100
     else
@@ -204,7 +199,7 @@ class window.Component.Playfield
     if @pushCounter <= 0
       @pushCounter = @pushTime
       @score      += @push()
-  tick:=>
+  update:=>
     return unless @running
     @tick_push() if @should_push
     @update_panels()

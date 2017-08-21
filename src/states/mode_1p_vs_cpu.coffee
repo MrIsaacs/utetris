@@ -9,6 +9,8 @@ class controller
   create:=>
     game.stage.backgroundColor = 0x000000
 
+    @state_music = 'stop'
+
     @danger = false
     @msx_stage_results  = game.add.audio 'msx_stage_results'
     @msx_stage          = game.add.audio 'msx_stage'
@@ -21,25 +23,57 @@ class controller
     @create_frame(offset)
     @playfield1.create_after()
     @playfield2.create_after()
-  tick_danger:(is_danger)=>
-    if is_danger
-      if @danger is false
+  stage_music:(state)=>
+    switch state
+      when 'none'
+        @state_music = state
+        @msx_stage.stop()
+        @msx_stage_critical.stop()
+        @msx_stage_results.stop()
+      when 'active'
+        return if @state_music is 'active'
+        @state_music = state
+        @msx_stage.play()
+        @msx_stage_critical.stop()
+        @msx_stage_results.stop()
+      when 'danger'
+        return if @state_music is 'danger'
+        @state_music = state
         @msx_stage.stop()
         @msx_stage_critical.play()
+        @msx_stage_results.stop()
+      when 'results'
+        return if @state_music is 'results'
+        @state_music = state
+        @msx_stage.stop()
+        @msx_stage_critical.stop()
+        @msx_stage_results.play()
+  game_over:=>
+    @stage_music 'results'
+    @playfield1.game_over()
+    @playfield2.game_over()
+  danger_check:=>
+    d1 = @playfield1.is_danger 1
+    d2 = @playfield2.is_danger 2
+
+    if d1 || d2
+      if @danger is false
+        @stage_music 'danger'
       @danger = true
     else
       if @danger is true
-        @msx_stage_critical.stop()
-        @msx_stage.play()
+        @stage_music 'active'
       @danger = false
   update:=>
-    @playfield1.tick()
-    @playfield2.tick()
+    @playfield1.update()
+    @playfield2.update()
+
+    @danger_check()
 
     @playfield1.render()
     @playfield2.render()
   shutdown:=>
-    @msx_stage.stop()
+    @stage_music 'stop'
     @msx_stage_critical.stop()
     @msx_stage_results.stop()
     @playfield1.shutdown()

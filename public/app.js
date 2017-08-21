@@ -105249,7 +105249,7 @@ PIXI.TextureSilentFail = true;
       this.update_newline = bind(this.update_newline, this);
       this.update_stack = bind(this.update_stack, this);
       this.score_current = bind(this.score_current, this);
-      this.tick = bind(this.tick, this);
+      this.update = bind(this.update, this);
       this.tick_push = bind(this.tick_push, this);
       this.is_danger = bind(this.is_danger, this);
       this.chainOver = bind(this.chainOver, this);
@@ -105330,7 +105330,7 @@ PIXI.TextureSilentFail = true;
     Playfield.prototype.push = function() {
       var i, ii, j, k, len, panel, ref, ref1, ref2, stack;
       if (this.is_danger(0)) {
-        this.game_over();
+        this.stage.game_over();
         return 0;
       }
       stack = new Array(PANELS);
@@ -105386,9 +105386,6 @@ PIXI.TextureSilentFail = true;
       }
       this.running = false;
       console.log('gameover', this.stack[0].i, this.stack[1].i, this.stack[2].i, this.stack[3].i, this.stack[4].i, this.stack[5].i);
-      this.stage.msx_stage.stop();
-      this.stage.msx_stage_critical.stop();
-      this.stage.msx_stage_results.play();
       this.pushCounter = 0;
     };
 
@@ -105518,7 +105515,6 @@ PIXI.TextureSilentFail = true;
      */
 
     Playfield.prototype.tick_push = function() {
-      this.stage.tick_danger(this.is_danger(1));
       if (this.cursor.can_push()) {
         this.pushCounter -= 100;
       } else {
@@ -105530,7 +105526,7 @@ PIXI.TextureSilentFail = true;
       }
     };
 
-    Playfield.prototype.tick = function() {
+    Playfield.prototype.update = function() {
       var cnc;
       if (!this.running) {
         return;
@@ -106592,7 +106588,9 @@ PIXI.TextureSilentFail = true;
     function controller() {
       this.shutdown = bind(this.shutdown, this);
       this.update = bind(this.update, this);
-      this.tick_danger = bind(this.tick_danger, this);
+      this.danger_check = bind(this.danger_check, this);
+      this.game_over = bind(this.game_over, this);
+      this.stage_music = bind(this.stage_music, this);
       this.create = bind(this.create, this);
       this.create_frame = bind(this.create_frame, this);
       this.create_bg = bind(this.create_bg, this);
@@ -106611,6 +106609,7 @@ PIXI.TextureSilentFail = true;
     controller.prototype.create = function() {
       var offset;
       game.stage.backgroundColor = 0x000000;
+      this.state_music = 'stop';
       this.danger = false;
       this.msx_stage_results = game.add.audio('msx_stage_results');
       this.msx_stage = game.add.audio('msx_stage');
@@ -106632,31 +106631,73 @@ PIXI.TextureSilentFail = true;
       return this.playfield2.create_after();
     };
 
-    controller.prototype.tick_danger = function(is_danger) {
-      if (is_danger) {
-        if (this.danger === false) {
+    controller.prototype.stage_music = function(state) {
+      switch (state) {
+        case 'none':
+          this.state_music = state;
+          this.msx_stage.stop();
+          this.msx_stage_critical.stop();
+          return this.msx_stage_results.stop();
+        case 'active':
+          if (this.state_music === 'active') {
+            return;
+          }
+          this.state_music = state;
+          this.msx_stage.play();
+          this.msx_stage_critical.stop();
+          return this.msx_stage_results.stop();
+        case 'danger':
+          if (this.state_music === 'danger') {
+            return;
+          }
+          this.state_music = state;
           this.msx_stage.stop();
           this.msx_stage_critical.play();
+          return this.msx_stage_results.stop();
+        case 'results':
+          if (this.state_music === 'results') {
+            return;
+          }
+          this.state_music = state;
+          this.msx_stage.stop();
+          this.msx_stage_critical.stop();
+          return this.msx_stage_results.play();
+      }
+    };
+
+    controller.prototype.game_over = function() {
+      this.stage_music('results');
+      this.playfield1.game_over();
+      return this.playfield2.game_over();
+    };
+
+    controller.prototype.danger_check = function() {
+      var d1, d2;
+      d1 = this.playfield1.is_danger(1);
+      d2 = this.playfield2.is_danger(2);
+      if (d1 || d2) {
+        if (this.danger === false) {
+          this.stage_music('danger');
         }
         return this.danger = true;
       } else {
         if (this.danger === true) {
-          this.msx_stage_critical.stop();
-          this.msx_stage.play();
+          this.stage_music('active');
         }
         return this.danger = false;
       }
     };
 
     controller.prototype.update = function() {
-      this.playfield1.tick();
-      this.playfield2.tick();
+      this.playfield1.update();
+      this.playfield2.update();
+      this.danger_check();
       this.playfield1.render();
       return this.playfield2.render();
     };
 
     controller.prototype.shutdown = function() {
-      this.msx_stage.stop();
+      this.stage_music('stop');
       this.msx_stage_critical.stop();
       this.msx_stage_results.stop();
       return this.playfield1.shutdown();
