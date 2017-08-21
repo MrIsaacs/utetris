@@ -104697,7 +104697,7 @@ PIXI.TextureSilentFail = true;
 */
 
 (function() {
-  window.ROWS = 12;
+  window.ROWS = 11;
 
   window.COLS = 6;
 
@@ -105266,7 +105266,7 @@ PIXI.TextureSilentFail = true;
       this.create_newline = bind(this.create_newline, this);
       this.push = bind(this.push, this);
       this.create_stack = bind(this.create_stack, this);
-      this.create_cursor = bind(this.create_cursor, this);
+      this.create_after = bind(this.create_after, this);
       this.create = bind(this.create, this);
       this.menu_pause = new Component.MenuPause();
       this.cursor = new Component.PlayfieldCursor();
@@ -105295,13 +105295,12 @@ PIXI.TextureSilentFail = true;
       this.chain = 0;
       this.pushTime = PUSHTIME;
       this.pushCounter = this.pushTime;
-      this.menu_pause.create(this);
       this.score_lbl.create();
       this.blank.create(this, null, null, true);
       return this.running = true;
     };
 
-    Playfield.prototype.create_cursor = function() {
+    Playfield.prototype.create_after = function() {
       this.layer_cursor = game.add.group();
       this.layer_cursor.x = this.x;
       this.layer_cursor.y = this.y;
@@ -105309,8 +105308,10 @@ PIXI.TextureSilentFail = true;
         ai: this.has_ai
       });
       if (this.has_ai) {
-        return this.ai.create(this, this.cursor);
+        this.ai.create(this, this.cursor);
       }
+      this.menu_pause.create(this);
+      return this.render();
     };
 
     Playfield.prototype.create_stack = function(data) {
@@ -105722,7 +105723,7 @@ PIXI.TextureSilentFail = true;
         return;
       }
       this.sfx_select.play();
-      if (this.y > 1) {
+      if (this.y > 0) {
         return this.y--;
       }
     };
@@ -106512,11 +106513,10 @@ PIXI.TextureSilentFail = true;
       this.playfield1.create(this, {
         push: true,
         x: offset + 8,
-        y: 8
+        y: 8 + 16
       });
       this.create_frame(offset);
-      this.playfield1.create_cursor();
-      return this.playfield1.render();
+      return this.playfield1.create_after();
     };
 
     controller.prototype.tick_danger = function(is_danger) {

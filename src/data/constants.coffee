@@ -1,5 +1,5 @@
 # Playfield size
-window.ROWS = 12
+window.ROWS = 11
 window.COLS = 6
 window.PANELS = ROWS * COLS
 #number of starting blocks

@@ -49,18 +49,21 @@ class window.Component.Playfield
     @pushTime    = PUSHTIME
     @pushCounter = @pushTime
 
-    @menu_pause.create @
     @score_lbl.create()
     @blank.create @, null, null, true
 
     @running = true
-  create_cursor:=>
+  create_after:=>
     @layer_cursor = game.add.group()
     @layer_cursor.x = @x
     @layer_cursor.y = @y
 
     @cursor.create @, ai: @has_ai
     @ai.create @, @cursor if @has_ai
+
+    @menu_pause.create @
+
+    @render()
   create_stack:(data)=>
     @stack = @new_panels ROWS
     if data

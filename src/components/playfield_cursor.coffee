@@ -30,7 +30,7 @@ class window.Component.PlayfieldCursor
   up:=>
     return unless @playfield.running
     @sfx_select.play()
-    @y-- if @y > 1
+    @y-- if @y > 0
   down:=>
     return unless @playfield.running
     @sfx_select.play()

@@ -17,13 +17,11 @@ class controller
 
     offset = 89
     @create_bg()
-    @playfield1.create @, push: true, x: offset+8, y: 8
+    @playfield1.create @, push: true, x: offset+8, y: 8 + 16
     #@playfield2.create @, push: true, x: offset+152, y: 8
     @create_frame(offset)
-    @playfield1.create_cursor()
-    #@playfield2.create_cursor()
-    @playfield1.render()
-    #@playfield2.render()
+    @playfield1.create_after()
+    #@playfield2.create_after()
   tick_danger:(is_danger)=>
     if is_danger
       if @danger is false
