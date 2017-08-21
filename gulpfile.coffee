@@ -33,6 +33,7 @@ js_app = [
 
   './src/components/playfield.coffee'
   './src/components/playfield_cursor.coffee'
+  './src/components/playfield_countdown.coffee'
 
   './src/components/panel.coffee'
   './src/components/score.coffee'

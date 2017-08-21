@@ -13,7 +13,6 @@ class controller
     @msx_stage_results  = game.add.audio 'msx_stage_results'
     @msx_stage          = game.add.audio 'msx_stage'
     @msx_stage_critical = game.add.audio 'msx_stage_critical'
-    @msx_stage.play()
 
     offset = 89
     @create_bg()

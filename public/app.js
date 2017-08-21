@@ -104745,7 +104745,7 @@ PIXI.TextureSilentFail = true;
 
   window.MENUCURSORBLINK = 12;
 
-  window.STARTPOS_PANELCURSOR_SPEED = 2;
+  window.STARTPOS_PANELCURSOR_SPEED = 6;
 
   window.ANIM_SWAPTIME = 4;
 
@@ -105269,6 +105269,7 @@ PIXI.TextureSilentFail = true;
       this.create_after = bind(this.create_after, this);
       this.create = bind(this.create, this);
       this.menu_pause = new Component.MenuPause();
+      this.countdown = new Component.PlayfieldCountdown();
       this.cursor = new Component.PlayfieldCursor();
       this.score_lbl = new Component.Score();
       this.blank = new Component.Panel();
@@ -105296,14 +105297,14 @@ PIXI.TextureSilentFail = true;
       this.pushTime = PUSHTIME;
       this.pushCounter = this.pushTime;
       this.score_lbl.create();
-      this.blank.create(this, null, null, true);
-      return this.running = true;
+      return this.blank.create(this, null, null, true);
     };
 
     Playfield.prototype.create_after = function() {
       this.layer_cursor = game.add.group();
       this.layer_cursor.x = this.x;
       this.layer_cursor.y = this.y;
+      this.countdown.create(this);
       this.cursor.create(this, {
         ai: this.has_ai
       });
@@ -105439,7 +105440,7 @@ PIXI.TextureSilentFail = true;
       results = [];
       for (i = j = 0, len = ref.length; j < len; i = ++j) {
         panel = ref[i];
-        results.push(panel.update(i, this.is_danger(2)));
+        results.push(panel.update(i, this.is_danger(1)));
       }
       return results;
     };
@@ -105507,8 +105508,8 @@ PIXI.TextureSilentFail = true;
      */
 
     Playfield.prototype.tick_push = function() {
-      this.stage.tick_danger(this.is_danger(2));
-      if (_d.controls.keys["pl" + this.pi + "_l"].isDown || _d.controls.keys["pl" + this.pi + "_r"].isDown && this.running) {
+      this.stage.tick_danger(this.is_danger(1));
+      if (this.cursor.can_push()) {
         this.pushCounter -= 100;
       } else {
         this.pushCounter--;
@@ -105647,6 +105648,7 @@ PIXI.TextureSilentFail = true;
         this.update_newline();
       }
       this.cursor.update();
+      this.countdown.update();
       this.menu_pause.update();
       this.score_lbl.update(this.chain, this.score);
       if (this.should_push) {
@@ -105673,6 +105675,7 @@ PIXI.TextureSilentFail = true;
     function PlayfieldCursor() {
       this.shutdown = bind(this.shutdown, this);
       this.update = bind(this.update, this);
+      this.can_push = bind(this.can_push, this);
       this.swap = bind(this.swap, this);
       this.right = bind(this.right, this);
       this.left = bind(this.left, this);
@@ -105680,6 +105683,7 @@ PIXI.TextureSilentFail = true;
       this.up = bind(this.up, this);
       this.pause = bind(this.pause, this);
       this.map_controls = bind(this.map_controls, this);
+      this.entrance = bind(this.entrance, this);
       this.create = bind(this.create, this);
     }
 
@@ -105689,8 +105693,9 @@ PIXI.TextureSilentFail = true;
       if (opts == null) {
         opts = {};
       }
+      this.state = 'hidden';
       this.sfx_select = game.add.audio('sfx_select');
-      this.animating_start_pos = true;
+      this.counter_flicker = 0;
       this.counter = 0;
       this.x = 2;
       this.y = 6;
@@ -105699,7 +105704,13 @@ PIXI.TextureSilentFail = true;
       this.sprite = game.make.sprite(((COLS - 2) * UNIT) - diff, 0 - diff, 'playfield_cursor', 0);
       this.sprite.animations.add('idle', [0, 1]);
       this.sprite.animations.play('idle', Math.round(game.time.desiredFps / 10), true);
+      this.sprite.visible = false;
       return this.playfield.layer_cursor.add(this.sprite);
+    };
+
+    PlayfieldCursor.prototype.entrance = function() {
+      this.sprite.visible = true;
+      return this.state = 'entering';
     };
 
     PlayfieldCursor.prototype.map_controls = function() {
@@ -105719,9 +105730,6 @@ PIXI.TextureSilentFail = true;
     };
 
     PlayfieldCursor.prototype.up = function() {
-      if (!this.playfield.running) {
-        return;
-      }
       this.sfx_select.play();
       if (this.y > 0) {
         return this.y--;
@@ -105729,9 +105737,6 @@ PIXI.TextureSilentFail = true;
     };
 
     PlayfieldCursor.prototype.down = function() {
-      if (!this.playfield.running) {
-        return;
-      }
       this.sfx_select.play();
       if (this.y < ROWS - 1) {
         return this.y++;
@@ -105739,9 +105744,6 @@ PIXI.TextureSilentFail = true;
     };
 
     PlayfieldCursor.prototype.left = function() {
-      if (!this.playfield.running) {
-        return;
-      }
       this.sfx_select.play();
       if (this.x > 0) {
         return this.x--;
@@ -105749,9 +105751,6 @@ PIXI.TextureSilentFail = true;
     };
 
     PlayfieldCursor.prototype.right = function() {
-      if (!this.playfield.running) {
-        return;
-      }
       this.sfx_select.play();
       if (this.x < COLS - 2) {
         return this.x++;
@@ -105759,10 +105758,14 @@ PIXI.TextureSilentFail = true;
     };
 
     PlayfieldCursor.prototype.swap = function() {
-      if (!this.playfield.running) {
+      if (!(this.playfield.running && this.state === 'active')) {
         return;
       }
       return this.playfield.swap(this.x, this.y);
+    };
+
+    PlayfieldCursor.prototype.can_push = function() {
+      return (_d.controls.keys["pl" + this.playfield.pi + "_l"].isDown || _d.controls.keys["pl" + this.playfield.pi + "_r"].isDown) && this.playfield.running && this.state === 'active';
     };
 
     PlayfieldCursor.prototype.update = function() {
@@ -105771,22 +105774,32 @@ PIXI.TextureSilentFail = true;
       y = this.playfield.should_push ? this.y : this.y + 1;
       x = (this.x * UNIT) - diff;
       y = (y * UNIT) - diff;
-      if (this.animating_start_pos) {
-        if (this.sprite.y < y) {
-          return this.sprite.y += STARTPOS_PANELCURSOR_SPEED;
-        } else if (this.sprite.x > x) {
-          return this.sprite.x -= STARTPOS_PANELCURSOR_SPEED;
-        } else {
-          this.animating_start_pos = false;
-          if (this.ai === false) {
-            return this.map_controls();
-          }
+      if (this.state === 'entering' || this.state === 'preactive') {
+        this.counter_flicker++;
+        if (this.counter_flicker > 1) {
+          this.counter_flicker = 0;
+          this.sprite.visible = !this.sprite.visible;
         }
-      } else {
-        diff = (UNIT / 16) * 3;
-        y = this.playfield.should_push ? this.y : this.y + 1;
-        this.sprite.x = (this.x * UNIT) - diff;
-        return this.sprite.y = (y * UNIT) - diff;
+      }
+      switch (this.state) {
+        case 'entering':
+          if (this.sprite.y < y) {
+            return this.sprite.y += STARTPOS_PANELCURSOR_SPEED;
+          } else if (this.sprite.x > x) {
+            return this.sprite.x -= STARTPOS_PANELCURSOR_SPEED;
+          } else {
+            this.state = 'preactive';
+            if (this.ai === false) {
+              return this.map_controls();
+            }
+          }
+          break;
+        case 'preactive':
+        case 'active':
+          diff = (UNIT / 16) * 3;
+          y = this.playfield.should_push ? this.y : this.y + 1;
+          this.sprite.x = (this.x * UNIT) - diff;
+          return this.sprite.y = (y * UNIT) - diff;
       }
     };
 
@@ -105795,6 +105808,69 @@ PIXI.TextureSilentFail = true;
     };
 
     return PlayfieldCursor;
+
+  })();
+
+}).call(this);
+
+(function() {
+  var bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+  window.Component.PlayfieldCountdown = (function() {
+    function PlayfieldCountdown() {
+      this.update = bind(this.update, this);
+      this.create = bind(this.create, this);
+    }
+
+    PlayfieldCountdown.prototype.create = function(playfield) {
+      var x, y;
+      this.playfield = playfield;
+      this.counter = 0;
+      this.state = 'moving';
+      x = this.playfield.x + 16;
+      y = -38;
+      return this.sprite = game.add.sprite(x, y, 'playfield_countdown', 0);
+    };
+
+    PlayfieldCountdown.prototype.update = function() {
+      if (this.state === 'moving') {
+        if (this.sprite.y < 80) {
+          this.sprite.y += 4;
+        } else {
+          this.state = 3;
+          this.playfield.cursor.entrance();
+        }
+      }
+      if (this.state === 3) {
+        this.counter++;
+        if (this.counter > 60) {
+          this.sprite.frame = 1;
+          this.counter = 0;
+          this.state = 2;
+        }
+      }
+      if (this.state === 2) {
+        this.counter++;
+        if (this.counter > 60) {
+          this.sprite.frame = 2;
+          this.counter = 0;
+          this.state = 1;
+        }
+      }
+      if (this.state === 1) {
+        this.counter++;
+        if (this.counter > 60) {
+          this.sprite.visible = false;
+          this.playfield.cursor.state = 'active';
+          this.playfield.cursor.sprite.visible = true;
+          this.playfield.running = true;
+          this.playfield.stage.msx_stage.play();
+          return this.state = null;
+        }
+      }
+    };
+
+    return PlayfieldCountdown;
 
   })();
 
@@ -106346,10 +106422,10 @@ PIXI.TextureSilentFail = true;
       game.load.image('menu_pause_cursor', './menu_pause_cursor.png');
       game.load.image('menu_pause', './menu_pause.png');
       game.load.image('pause', './pause.png');
-      game.load.image('countdown', './countdown.png');
       game.load.spritesheet('playfield_cursor', './playfield_cursor.png', 38, 22, 2);
       game.load.image('playfield_vs_frame', './playfield_vs_frame.png');
       game.load.image('playfield_vs_bg', './playfield_vs_bg.png');
+      game.load.spritesheet('playfield_countdown', './playfield_countdown.png', 62, 38, 3);
       game.load.spritesheet('panels', './panels.png', 16, 16, 136);
       return game.load.start();
     };
@@ -106507,7 +106583,6 @@ PIXI.TextureSilentFail = true;
       this.msx_stage_results = game.add.audio('msx_stage_results');
       this.msx_stage = game.add.audio('msx_stage');
       this.msx_stage_critical = game.add.audio('msx_stage_critical');
-      this.msx_stage.play();
       offset = 89;
       this.create_bg();
       this.playfield1.create(this, {

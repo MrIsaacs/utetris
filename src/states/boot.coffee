@@ -57,11 +57,11 @@ class controller
     game.load.image 'menu_pause_cursor', './menu_pause_cursor.png'
     game.load.image 'menu_pause'       , './menu_pause.png'
     game.load.image 'pause'            , './pause.png'
-    game.load.image 'countdown'        , './countdown.png'
     # Playfield ----
-    game.load.spritesheet 'playfield_cursor'  , './playfield_cursor.png'  , 38, 22, 2
-    game.load.image       'playfield_vs_frame', './playfield_vs_frame.png'
-    game.load.image       'playfield_vs_bg'   , './playfield_vs_bg.png'
+    game.load.spritesheet 'playfield_cursor'   , './playfield_cursor.png'  , 38, 22, 2
+    game.load.image       'playfield_vs_frame' , './playfield_vs_frame.png'
+    game.load.image       'playfield_vs_bg'    , './playfield_vs_bg.png'
+    game.load.spritesheet 'playfield_countdown', './playfield_countdown.png', 62, 38, 3
     game.load.spritesheet 'panels', './panels.png'  , 16, 16, 136
 
     game.load.start()

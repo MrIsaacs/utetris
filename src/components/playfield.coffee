@@ -22,6 +22,7 @@ class window.Component.Playfield
   running: false
   constructor:(@pi)->
     @menu_pause = new Component.MenuPause()
+    @countdown  = new Component.PlayfieldCountdown()
     @cursor     = new Component.PlayfieldCursor()
     @score_lbl  = new Component.Score()
     @blank      = new Component.Panel()
@@ -51,13 +52,12 @@ class window.Component.Playfield
 
     @score_lbl.create()
     @blank.create @, null, null, true
-
-    @running = true
   create_after:=>
     @layer_cursor = game.add.group()
     @layer_cursor.x = @x
     @layer_cursor.y = @y
 
+    @countdown.create @
     @cursor.create @, ai: @has_ai
     @ai.create @, @cursor if @has_ai
 
@@ -144,7 +144,7 @@ class window.Component.Playfield
             stack[i].set mode[i]
   update_panels:=>
     for panel,i in @stack
-      panel.update i, @is_danger(2)
+      panel.update i, @is_danger(1)
   # Update the combos and chain for the entire grid.
   # Returns [combo, chain] where
   # combo is the amount of blocks participating in the combo
@@ -185,11 +185,9 @@ class window.Component.Playfield
   # updates the sprites to the correct locations in the canvas.
   ###
   tick_push:=>
-    @stage.tick_danger(@is_danger(2))
+    @stage.tick_danger(@is_danger(1))
 
-    if _d.controls.keys["pl#{@pi}_l"].isDown ||
-       _d.controls.keys["pl#{@pi}_r"].isDown &&
-       @running
+    if @cursor.can_push()
       @pushCounter -= 100
     else
       @pushCounter--
@@ -267,6 +265,7 @@ class window.Component.Playfield
     @update_newline() if @should_push
 
     @cursor.update()
+    @countdown.update()
     @menu_pause.update()
 
     @score_lbl.update @chain, @score
