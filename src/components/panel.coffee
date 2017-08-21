@@ -190,11 +190,17 @@ class window.Component.Panel
     @chain          = false
   # Swap this block with its right neighbour.
   swap:=>
+    #swap i
     i1 = @i
     i2 = @right.i
-
     @i       = i2
     @right.i = i1
+
+    #swap danger
+    d1 = @danger
+    d2 = @right.danger
+    @danger       = d2
+    @right.danger = d1
 
     @sprite.visible       = @i       != null
     @right.sprite.visible = @right.i != null

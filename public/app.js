@@ -106099,11 +106099,15 @@ PIXI.TextureSilentFail = true;
     };
 
     Panel.prototype.swap = function() {
-      var i1, i2;
+      var d1, d2, i1, i2;
       i1 = this.i;
       i2 = this.right.i;
       this.i = i2;
       this.right.i = i1;
+      d1 = this.danger;
+      d2 = this.right.danger;
+      this.danger = d2;
+      this.right.danger = d1;
       this.sprite.visible = this.i !== null;
       this.right.sprite.visible = this.right.i !== null;
       this.set_animation();
