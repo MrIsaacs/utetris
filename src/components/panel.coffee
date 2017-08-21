@@ -73,12 +73,12 @@ class window.Component.Panel
 
   frame:(i)=>
     (@i * 8) + i
-  play_land:=>   @sprite.animations.play 'land' , game.time.desiredFps, false
-  play_clear:=>  @sprite.animations.play 'clear', game.time.desiredFps, false
-  play_live:=>   @sprite.animations.play 'live'
-  play_dead:=>   @sprite.animations.play 'dead'
-  play_danger:=> @sprite.animations.play 'danger', game.time.desiredFps/3, true
-  play_face:=>   @sprite.animations.play 'face'
+  play_land:=>    @sprite.animations.play 'land' , game.time.desiredFps, false
+  play_clear:=>   @sprite.animations.play 'clear', game.time.desiredFps, false
+  play_live:=>    @sprite.animations.play 'live'
+  play_dead:=>    @sprite.animations.play 'dead'
+  play_danger:=>  @sprite.animations.play 'danger', game.time.desiredFps/3, true
+  play_newline:=>    @sprite.animations.play 'newline'
   set_animation:=>
     @sprite.frame = @frame(0)
     @sprite.animations.add 'land'  , [@frame(4),@frame(2),@frame(3),@frame(0)]
@@ -88,7 +88,8 @@ class window.Component.Panel
                                       @frame(6),@frame(0),@frame(5)]
     @sprite.animations.add 'live'  , [@frame(0)]
     @sprite.animations.add 'danger', [@frame(0),@frame(4),@frame(0),@frame(3),@frame(2),@frame(3)]
-    @sprite.animations.add 'face'  , [@frame(5)]
+    @sprite.animations.add 'dead'  , [@frame(5)]
+    @sprite.animations.add 'newline', [@frame(1)]
   set:(i)=>
     switch i
       when 'unique'
@@ -273,7 +274,14 @@ class window.Component.Panel
     combo  += panel2[0]
     chain   = true if middle[1] or panel1[1] or panel2[1]
     [combo,chain]
+  check_dead:(i,is_dead)=>
+    [x,y] = _f.i_2_xy(i)
+    if is_dead && is_dead.indexOf(x) != -1
+      @play_dead()
+    else
+      @play_live()
   update:(i,is_danger)=>
+    return unless @playfield.running
     [x,y] = _f.i_2_xy(i)
     if is_danger && is_danger.indexOf(x) != -1
       if @danger is false

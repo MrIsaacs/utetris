@@ -68,7 +68,7 @@ class window.Component.Playfield
     else
       @fill_panels @stack, 4, 'unique'
   push:=>
-    if @is_dead()
+    if @is_danger(0)
       @game_over()
       return 0
 
@@ -86,13 +86,10 @@ class window.Component.Playfield
 
     @cursor.y-- if @cursor.y > 1
     1
-
   create_newline:(mode)=>
     return unless @should_push
     @newline = @new_panels 1, mode
     @fill_panels @newline, 1, mode
-    for panel in @newline
-      panel.play_dead()
   pause:=>
     @menu_pause.pause()
     @running = false
@@ -100,8 +97,9 @@ class window.Component.Playfield
     @running = true
     @cursor.map_controls()
   game_over:=>
-    @stack[i].play_face()   for i in [0...PANELS]
-    @newline[i].play_face() for i in [0...COLS]
+    is_dead = @is_danger(0)
+    panel.check_dead i, is_dead for panel,i in @stack
+    panel.check_dead i, is_dead for panel,i in @newline
     @running = false
     console.log 'gameover',
       @stack[0].i
@@ -110,6 +108,9 @@ class window.Component.Playfield
       @stack[3].i
       @stack[4].i
       @stack[5].i
+    @stage.msx_stage.stop()
+    @stage.msx_stage_critical.stop()
+    @stage.msx_stage_results.play()
     @pushCounter = 0
     return
   #grid of blocks
@@ -140,7 +141,7 @@ class window.Component.Playfield
             stack[i].set mode[i]
   update_panels:=>
     for panel,i in @stack
-      panel.update i, @is_danger()
+      panel.update i, @is_danger(2)
   # Update the combos and chain for the entire grid.
   # Returns [combo, chain] where
   # combo is the amount of blocks participating in the combo
@@ -166,22 +167,13 @@ class window.Component.Playfield
     for panel in @stack
       chain = false if panel.chain
     chain
-  is_danger:=>
-    offset = COLS*2
+  is_danger:(within)=>
+    offset = COLS*within
     cols  = []
     for i in [0...COLS]
       if @stack[offset+i] && @stack[offset+i].i >= 0 && @stack[offset+i].i != null
         cols.push i
-    if cols.length > 0
-      cols
-    else
-      false
-  is_dead:=>
-    for i in [0...COLS]
-      if @stack[i] && @stack[i].i >= 0 && @stack[i].i != null
-        return true 
-    false
-
+    if cols.length > 0 then cols else false
   ### The tick function is the main function of the TaGame object.
   # It gets called every tick and executes the other internal functions.
   # It will update the grid,
@@ -190,7 +182,7 @@ class window.Component.Playfield
   # updates the sprites to the correct locations in the canvas.
   ###
   tick_push:=>
-    @stage.tick_danger(@is_danger())
+    @stage.tick_danger(@is_danger(2))
 
     if _d.controls.keys["pl#{@pi}_l"].isDown ||
        _d.controls.keys["pl#{@pi}_r"].isDown &&

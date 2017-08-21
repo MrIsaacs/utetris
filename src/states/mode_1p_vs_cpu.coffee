@@ -10,6 +10,7 @@ class controller
     game.stage.backgroundColor = 0x000000
 
     @danger = false
+    @msx_stage_results  = game.add.audio 'msx_stage_results'
     @msx_stage          = game.add.audio 'msx_stage'
     @msx_stage_critical = game.add.audio 'msx_stage_critical'
     @msx_stage.play()
@@ -42,6 +43,8 @@ class controller
     #@playfield2.render()
   shutdown:=>
     @msx_stage.stop()
+    @msx_stage_critical.stop()
+    @msx_stage_results.stop()
     @playfield1.shutdown()
 ctrl = new controller()
 _states.mode_1p_vs_cpu =

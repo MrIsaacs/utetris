@@ -105253,7 +105253,6 @@ PIXI.TextureSilentFail = true;
       this.score_current = bind(this.score_current, this);
       this.tick = bind(this.tick, this);
       this.tick_push = bind(this.tick_push, this);
-      this.is_dead = bind(this.is_dead, this);
       this.is_danger = bind(this.is_danger, this);
       this.chainOver = bind(this.chainOver, this);
       this.swap = bind(this.swap, this);
@@ -105325,7 +105324,7 @@ PIXI.TextureSilentFail = true;
 
     Playfield.prototype.push = function() {
       var i, ii, j, k, len, panel, ref, ref1, ref2, stack;
-      if (this.is_dead()) {
+      if (this.is_danger(0)) {
         this.game_over();
         return 0;
       }
@@ -105349,19 +105348,11 @@ PIXI.TextureSilentFail = true;
     };
 
     Playfield.prototype.create_newline = function(mode) {
-      var j, len, panel, ref, results;
       if (!this.should_push) {
         return;
       }
       this.newline = this.new_panels(1, mode);
-      this.fill_panels(this.newline, 1, mode);
-      ref = this.newline;
-      results = [];
-      for (j = 0, len = ref.length; j < len; j++) {
-        panel = ref[j];
-        results.push(panel.play_dead());
-      }
-      return results;
+      return this.fill_panels(this.newline, 1, mode);
     };
 
     Playfield.prototype.pause = function() {
@@ -105375,15 +105366,23 @@ PIXI.TextureSilentFail = true;
     };
 
     Playfield.prototype.game_over = function() {
-      var i, j, k, ref, ref1;
-      for (i = j = 0, ref = PANELS; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
-        this.stack[i].play_face();
+      var i, is_dead, j, k, len, len1, panel, ref, ref1;
+      is_dead = this.is_danger(0);
+      ref = this.stack;
+      for (i = j = 0, len = ref.length; j < len; i = ++j) {
+        panel = ref[i];
+        panel.check_dead(i, is_dead);
       }
-      for (i = k = 0, ref1 = COLS; 0 <= ref1 ? k < ref1 : k > ref1; i = 0 <= ref1 ? ++k : --k) {
-        this.newline[i].play_face();
+      ref1 = this.newline;
+      for (i = k = 0, len1 = ref1.length; k < len1; i = ++k) {
+        panel = ref1[i];
+        panel.check_dead(i, is_dead);
       }
       this.running = false;
       console.log('gameover', this.stack[0].i, this.stack[1].i, this.stack[2].i, this.stack[3].i, this.stack[4].i, this.stack[5].i);
+      this.stage.msx_stage.stop();
+      this.stage.msx_stage_critical.stop();
+      this.stage.msx_stage_results.play();
       this.pushCounter = 0;
     };
 
@@ -105439,7 +105438,7 @@ PIXI.TextureSilentFail = true;
       results = [];
       for (i = j = 0, len = ref.length; j < len; i = ++j) {
         panel = ref[i];
-        results.push(panel.update(i, this.is_danger()));
+        results.push(panel.update(i, this.is_danger(2)));
       }
       return results;
     };
@@ -105481,9 +105480,9 @@ PIXI.TextureSilentFail = true;
       return chain;
     };
 
-    Playfield.prototype.is_danger = function() {
+    Playfield.prototype.is_danger = function(within) {
       var cols, i, j, offset, ref;
-      offset = COLS * 2;
+      offset = COLS * within;
       cols = [];
       for (i = j = 0, ref = COLS; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
         if (this.stack[offset + i] && this.stack[offset + i].i >= 0 && this.stack[offset + i].i !== null) {
@@ -105497,16 +105496,6 @@ PIXI.TextureSilentFail = true;
       }
     };
 
-    Playfield.prototype.is_dead = function() {
-      var i, j, ref;
-      for (i = j = 0, ref = COLS; 0 <= ref ? j < ref : j > ref; i = 0 <= ref ? ++j : --j) {
-        if (this.stack[i] && this.stack[i].i >= 0 && this.stack[i].i !== null) {
-          return true;
-        }
-      }
-      return false;
-    };
-
 
     /* The tick function is the main function of the TaGame object.
      * It gets called every tick and executes the other internal functions.
@@ -105517,7 +105506,7 @@ PIXI.TextureSilentFail = true;
      */
 
     Playfield.prototype.tick_push = function() {
-      this.stage.tick_danger(this.is_danger());
+      this.stage.tick_danger(this.is_danger(2));
       if (_d.controls.keys["pl" + this.pi + "_l"].isDown || _d.controls.keys["pl" + this.pi + "_r"].isDown && this.running) {
         this.pushCounter -= 100;
       } else {
@@ -105816,6 +105805,7 @@ PIXI.TextureSilentFail = true;
   window.Component.Panel = (function() {
     function Panel() {
       this.update = bind(this.update, this);
+      this.check_dead = bind(this.check_dead, this);
       this.check_neighbours = bind(this.check_neighbours, this);
       this.chain_and_combo = bind(this.chain_and_combo, this);
       this.nocombo = bind(this.nocombo, this);
@@ -105827,7 +105817,7 @@ PIXI.TextureSilentFail = true;
       this.update_state = bind(this.update_state, this);
       this.set = bind(this.set, this);
       this.set_animation = bind(this.set_animation, this);
-      this.play_face = bind(this.play_face, this);
+      this.play_newline = bind(this.play_newline, this);
       this.play_danger = bind(this.play_danger, this);
       this.play_dead = bind(this.play_dead, this);
       this.play_live = bind(this.play_live, this);
@@ -105964,8 +105954,8 @@ PIXI.TextureSilentFail = true;
       return this.sprite.animations.play('danger', game.time.desiredFps / 3, true);
     };
 
-    Panel.prototype.play_face = function() {
-      return this.sprite.animations.play('face');
+    Panel.prototype.play_newline = function() {
+      return this.sprite.animations.play('newline');
     };
 
     Panel.prototype.set_animation = function() {
@@ -105974,7 +105964,8 @@ PIXI.TextureSilentFail = true;
       this.sprite.animations.add('clear', [this.frame(6), this.frame(0), this.frame(6), this.frame(0), this.frame(6), this.frame(0), this.frame(6), this.frame(0), this.frame(6), this.frame(0), this.frame(6), this.frame(0), this.frame(6), this.frame(0), this.frame(5)]);
       this.sprite.animations.add('live', [this.frame(0)]);
       this.sprite.animations.add('danger', [this.frame(0), this.frame(4), this.frame(0), this.frame(3), this.frame(2), this.frame(3)]);
-      return this.sprite.animations.add('face', [this.frame(5)]);
+      this.sprite.animations.add('dead', [this.frame(5)]);
+      return this.sprite.animations.add('newline', [this.frame(1)]);
     };
 
     Panel.prototype.set = function(i) {
@@ -106197,8 +106188,21 @@ PIXI.TextureSilentFail = true;
       return [combo, chain];
     };
 
+    Panel.prototype.check_dead = function(i, is_dead) {
+      var ref, x, y;
+      ref = _f.i_2_xy(i), x = ref[0], y = ref[1];
+      if (is_dead && is_dead.indexOf(x) !== -1) {
+        return this.play_dead();
+      } else {
+        return this.play_live();
+      }
+    };
+
     Panel.prototype.update = function(i, is_danger) {
       var ref, x, y;
+      if (!this.playfield.running) {
+        return;
+      }
       ref = _f.i_2_xy(i), x = ref[0], y = ref[1];
       if (is_danger && is_danger.indexOf(x) !== -1) {
         if (this.danger === false) {
@@ -106332,6 +106336,7 @@ PIXI.TextureSilentFail = true;
       Phaser.Canvas.setImageRenderingCrisp(game.canvas);
       game.load.audio('msx_stage', './msx_stage.mp3');
       game.load.audio('msx_stage_critical', './msx_stage_critical.mp3');
+      game.load.audio('msx_stage_results', './msx_stage_results.mp3');
       game.load.audio('sfx_select', './sfx_select.mp3');
       game.load.audio('sfx_swap', './sfx_swap.mp3');
       game.load.image('bg_blue', './bg_blue.png');
@@ -106498,6 +106503,7 @@ PIXI.TextureSilentFail = true;
       var offset;
       game.stage.backgroundColor = 0x000000;
       this.danger = false;
+      this.msx_stage_results = game.add.audio('msx_stage_results');
       this.msx_stage = game.add.audio('msx_stage');
       this.msx_stage_critical = game.add.audio('msx_stage_critical');
       this.msx_stage.play();
@@ -106536,6 +106542,8 @@ PIXI.TextureSilentFail = true;
 
     controller.prototype.shutdown = function() {
       this.msx_stage.stop();
+      this.msx_stage_critical.stop();
+      this.msx_stage_results.stop();
       return this.playfield1.shutdown();
     };
 
