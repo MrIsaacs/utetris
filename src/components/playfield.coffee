@@ -73,9 +73,9 @@ class window.Component.Playfield
   create_stack:(data)=>
     @stack = @new_panels ROWS
     if data
-      @fill_panels @stack, data
+      @fill_panels false, @stack, data
     else
-      @fill_panels @stack, 5, 'unique'
+      @fill_panels false, @stack, 5, 'unique'
   push:=>
     if @is_danger(0)
       @game_over()
@@ -88,6 +88,7 @@ class window.Component.Playfield
     for panel,i in @newline
       ii = (PANELS-COLS)+i
       stack[ii] = panel
+      stack[ii].newline = false
       stack[ii].play_live()
 
     @stack = stack
@@ -98,7 +99,7 @@ class window.Component.Playfield
   create_newline:(mode)=>
     return unless @should_push
     @newline = @new_panels 1, mode
-    @fill_panels @newline, 1, mode
+    @fill_panels true, @newline, 1, mode
   pause:=>
     @menu_pause.pause()
     @running = false
@@ -131,7 +132,7 @@ class window.Component.Playfield
       panels[i] = new Component.Panel()
       panels[i].create @, x, y
     panels
-  fill_panels:(stack, rows, mode=null)=>
+  fill_panels:(newline, stack, rows, mode=null)=>
     if _.isArray(rows)
       data    = rows
       offset  = (ROWS - (data.length / COLS)) * COLS
@@ -148,6 +149,9 @@ class window.Component.Playfield
           when 'random' then stack[i].set 'random'
           else
             stack[i].set mode[i]
+        if newline
+          stack[i].newline = true
+          stack[i].play_newline()
   update_panels:=>
     for panel,i in @stack
       panel.update i, @is_danger(1)

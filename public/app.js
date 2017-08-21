@@ -105321,9 +105321,9 @@ PIXI.TextureSilentFail = true;
     Playfield.prototype.create_stack = function(data) {
       this.stack = this.new_panels(ROWS);
       if (data) {
-        return this.fill_panels(this.stack, data);
+        return this.fill_panels(false, this.stack, data);
       } else {
-        return this.fill_panels(this.stack, 5, 'unique');
+        return this.fill_panels(false, this.stack, 5, 'unique');
       }
     };
 
@@ -105342,6 +105342,7 @@ PIXI.TextureSilentFail = true;
         panel = ref2[i];
         ii = (PANELS - COLS) + i;
         stack[ii] = panel;
+        stack[ii].newline = false;
         stack[ii].play_live();
       }
       this.stack = stack;
@@ -105357,7 +105358,7 @@ PIXI.TextureSilentFail = true;
         return;
       }
       this.newline = this.new_panels(1, mode);
-      return this.fill_panels(this.newline, 1, mode);
+      return this.fill_panels(true, this.newline, 1, mode);
     };
 
     Playfield.prototype.pause = function() {
@@ -105403,7 +105404,7 @@ PIXI.TextureSilentFail = true;
       return panels;
     };
 
-    Playfield.prototype.fill_panels = function(stack, rows, mode) {
+    Playfield.prototype.fill_panels = function(newline, stack, rows, mode) {
       var color, data, i, j, k, len, offset, ref, ref1, results, results1, size;
       if (mode == null) {
         mode = null;
@@ -105424,13 +105425,19 @@ PIXI.TextureSilentFail = true;
         for (i = k = ref = offset, ref1 = offset + size; ref <= ref1 ? k < ref1 : k > ref1; i = ref <= ref1 ? ++k : --k) {
           switch (mode) {
             case 'unique':
-              results1.push(stack[i].set('unique'));
+              stack[i].set('unique');
               break;
             case 'random':
-              results1.push(stack[i].set('random'));
+              stack[i].set('random');
               break;
             default:
-              results1.push(stack[i].set(mode[i]));
+              stack[i].set(mode[i]);
+          }
+          if (newline) {
+            stack[i].newline = true;
+            results1.push(stack[i].play_newline());
+          } else {
+            results1.push(void 0);
           }
         }
         return results1;
@@ -106047,6 +106054,7 @@ PIXI.TextureSilentFail = true;
     };
 
     Panel.prototype.play_newline = function() {
+      console.log('play newline');
       return this.sprite.animations.play('newline');
     };
 
@@ -106078,9 +106086,10 @@ PIXI.TextureSilentFail = true;
     };
 
     Panel.prototype.update_state = function() {
-
-      /* If the block has a counter, decrement it, return if it is not done */
       if (this.i === null) {
+        return;
+      }
+      if (this.newline) {
         return;
       }
       if (this.counter > 0) {

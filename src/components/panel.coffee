@@ -78,7 +78,9 @@ class window.Component.Panel
   play_live:=>    @sprite.animations.play 'live'
   play_dead:=>    @sprite.animations.play 'dead'
   play_danger:=>  @sprite.animations.play 'danger', game.time.desiredFps/3, true
-  play_newline:=>    @sprite.animations.play 'newline'
+  play_newline:=>    
+    console.log 'play newline'
+    @sprite.animations.play 'newline'
   set_animation:=>
     @sprite.frame = @frame(0)
     @sprite.animations.add 'land'  , [@frame(4),@frame(2),@frame(3),@frame(0)]
@@ -107,8 +109,8 @@ class window.Component.Panel
   # Will keep its current state it its counter is still running.
   # Block behaviour should be described in the wiki
   update_state:=>
-    ### If the block has a counter, decrement it, return if it is not done###
     return if @i is null
+    return if @newline
     if @counter > 0
       @counter--
       return if @counter > 0
