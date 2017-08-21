@@ -105244,6 +105244,8 @@ PIXI.TextureSilentFail = true;
 
     Playfield.prototype.running = false;
 
+    Playfield.prototype.land = false;
+
     function Playfield(pi) {
       this.pi = pi;
       this.shutdown = bind(this.shutdown, this);
@@ -105282,6 +105284,11 @@ PIXI.TextureSilentFail = true;
         opts = {};
       }
       this.sfx_swap = game.add.audio('sfx_swap');
+      this.sfx_land = [];
+      this.sfx_land[0] = game.add.audio('sfx_drop0');
+      this.sfx_land[1] = game.add.audio('sfx_drop1');
+      this.sfx_land[2] = game.add.audio('sfx_drop2');
+      this.sfx_land[3] = game.add.audio('sfx_drop3');
       this.should_push = opts.push || false;
       this.height = (ROWS + 1) * UNIT;
       this.width = COLS * UNIT;
@@ -105642,10 +105649,15 @@ PIXI.TextureSilentFail = true;
     };
 
     Playfield.prototype.render = function() {
-      var lift;
+      var i, lift;
       this.update_stack();
       if (this.should_push) {
         this.update_newline();
+      }
+      if (this.land === true) {
+        i = game.rnd.integerInRange(0, 3);
+        this.sfx_land[i].play();
+        this.land = false;
       }
       this.cursor.update();
       this.countdown.update();
@@ -105825,6 +105837,8 @@ PIXI.TextureSilentFail = true;
     PlayfieldCountdown.prototype.create = function(playfield) {
       var x, y;
       this.playfield = playfield;
+      this.sfx_blip = game.add.audio('sfx_countdown_blip');
+      this.sfx_ding = game.add.audio('sfx_countdown_ding');
       this.counter = 0;
       this.state = 'moving';
       x = this.playfield.x + 16;
@@ -105837,14 +105851,17 @@ PIXI.TextureSilentFail = true;
         if (this.sprite.y < 80) {
           this.sprite.y += 4;
         } else {
+          this.sprite.frame = 1;
           this.state = 3;
           this.playfield.cursor.entrance();
+          this.sfx_blip.play();
         }
       }
       if (this.state === 3) {
         this.counter++;
         if (this.counter > 60) {
-          this.sprite.frame = 1;
+          this.sfx_blip.play();
+          this.sprite.frame = 2;
           this.counter = 0;
           this.state = 2;
         }
@@ -105852,7 +105869,8 @@ PIXI.TextureSilentFail = true;
       if (this.state === 2) {
         this.counter++;
         if (this.counter > 60) {
-          this.sprite.frame = 2;
+          this.sfx_blip.play();
+          this.sprite.frame = 3;
           this.counter = 0;
           this.state = 1;
         }
@@ -105860,6 +105878,7 @@ PIXI.TextureSilentFail = true;
       if (this.state === 1) {
         this.counter++;
         if (this.counter > 60) {
+          this.sfx_ding.play();
           this.sprite.visible = false;
           this.playfield.cursor.state = 'active';
           this.playfield.cursor.sprite.visible = true;
@@ -106114,6 +106133,7 @@ PIXI.TextureSilentFail = true;
           }
           if ((this.state === STATIC || this.state === SWAP) && this.sprite) {
             this.play_land();
+            this.playfield.land = true;
           }
           break;
         case CLEAR:
@@ -106416,6 +106436,12 @@ PIXI.TextureSilentFail = true;
       game.load.audio('msx_stage_results', './msx_stage_results.mp3');
       game.load.audio('sfx_select', './sfx_select.mp3');
       game.load.audio('sfx_swap', './sfx_swap.mp3');
+      game.load.audio('sfx_countdown_blip', './sfx_countdown_blip.mp3');
+      game.load.audio('sfx_countdown_ding', './sfx_countdown_ding.mp3');
+      game.load.audio('sfx_drop0', './sfx_drop0.mp3');
+      game.load.audio('sfx_drop1', './sfx_drop1.mp3');
+      game.load.audio('sfx_drop2', './sfx_drop2.mp3');
+      game.load.audio('sfx_drop3', './sfx_drop3.mp3');
       game.load.image('bg_blue', './bg_blue.png');
       game.load.image('menu', './menu.png');
       game.load.image('menu_cursor', './menu_cursor.png');
@@ -106425,7 +106451,7 @@ PIXI.TextureSilentFail = true;
       game.load.spritesheet('playfield_cursor', './playfield_cursor.png', 38, 22, 2);
       game.load.image('playfield_vs_frame', './playfield_vs_frame.png');
       game.load.image('playfield_vs_bg', './playfield_vs_bg.png');
-      game.load.spritesheet('playfield_countdown', './playfield_countdown.png', 62, 38, 3);
+      game.load.spritesheet('playfield_countdown', './playfield_countdown.png', 62, 38, 4);
       game.load.spritesheet('panels', './panels.png', 16, 16, 136);
       return game.load.start();
     };

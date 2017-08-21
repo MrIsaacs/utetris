@@ -49,6 +49,14 @@ class controller
     # SFX ----------
     game.load.audio 'sfx_select' , './sfx_select.mp3'
     game.load.audio 'sfx_swap'   , './sfx_swap.mp3'
+
+    game.load.audio 'sfx_countdown_blip'   , './sfx_countdown_blip.mp3'
+    game.load.audio 'sfx_countdown_ding'   , './sfx_countdown_ding.mp3'
+
+    game.load.audio 'sfx_drop0'   , './sfx_drop0.mp3'
+    game.load.audio 'sfx_drop1'   , './sfx_drop1.mp3'
+    game.load.audio 'sfx_drop2'   , './sfx_drop2.mp3'
+    game.load.audio 'sfx_drop3'   , './sfx_drop3.mp3'
     # Bg -----------
     game.load.image 'bg_blue', './bg_blue.png'
     # Menus --------
@@ -61,7 +69,7 @@ class controller
     game.load.spritesheet 'playfield_cursor'   , './playfield_cursor.png'  , 38, 22, 2
     game.load.image       'playfield_vs_frame' , './playfield_vs_frame.png'
     game.load.image       'playfield_vs_bg'    , './playfield_vs_bg.png'
-    game.load.spritesheet 'playfield_countdown', './playfield_countdown.png', 62, 38, 3
+    game.load.spritesheet 'playfield_countdown', './playfield_countdown.png', 62, 38, 4
     game.load.spritesheet 'panels', './panels.png'  , 16, 16, 136
 
     game.load.start()

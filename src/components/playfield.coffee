@@ -20,6 +20,7 @@ class window.Component.Playfield
   pushCounter: 0
   has_ai: false
   running: false
+  land: false # when any panel has landed in the stack
   constructor:(@pi)->
     @menu_pause = new Component.MenuPause()
     @countdown  = new Component.PlayfieldCountdown()
@@ -28,7 +29,14 @@ class window.Component.Playfield
     @blank      = new Component.Panel()
     @ai         = new Component.Ai()
   create:(@stage,opts={})=>
+
     @sfx_swap  = game.add.audio 'sfx_swap'
+    @sfx_land = []
+    @sfx_land[0]  = game.add.audio 'sfx_drop0'
+    @sfx_land[1]  = game.add.audio 'sfx_drop1'
+    @sfx_land[2]  = game.add.audio 'sfx_drop2'
+    @sfx_land[3]  = game.add.audio 'sfx_drop3'
+
 
     @should_push = opts.push || false
 
@@ -263,6 +271,10 @@ class window.Component.Playfield
   render:->
     @update_stack()
     @update_newline() if @should_push
+    if @land is true
+      i = game.rnd.integerInRange(0,3)
+      @sfx_land[i].play()
+      @land = false
 
     @cursor.update()
     @countdown.update()

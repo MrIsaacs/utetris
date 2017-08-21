@@ -146,6 +146,7 @@ class window.Component.Panel
           @chain   = true if @under.chain
         if (@state is STATIC or @state is SWAP) and @sprite
           @play_land()
+          @playfield.land = true
       when CLEAR
         @erase()
       else

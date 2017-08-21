@@ -1,5 +1,8 @@
 class window.Component.PlayfieldCountdown
   create:(@playfield)=>
+    @sfx_blip  = game.add.audio 'sfx_countdown_blip'
+    @sfx_ding  = game.add.audio 'sfx_countdown_ding'
+
     @counter = 0
     @state   = 'moving'
     x = @playfield.x+16
@@ -11,23 +14,28 @@ class window.Component.PlayfieldCountdown
       if @sprite.y < 80
         @sprite.y += 4
       else
+        @sprite.frame = 1
         @state = 3
         @playfield.cursor.entrance()
+        @sfx_blip.play()
     if @state is 3
       @counter++
       if @counter > 60
-        @sprite.frame = 1
+        @sfx_blip.play()
+        @sprite.frame = 2
         @counter = 0
         @state = 2
     if @state is 2
       @counter++
       if @counter > 60
-        @sprite.frame = 2
+        @sfx_blip.play()
+        @sprite.frame = 3
         @counter = 0
         @state = 1
     if @state is 1
       @counter++
       if @counter > 60
+        @sfx_ding.play()
         @sprite.visible         = false
         @playfield.cursor.state = 'active'
         @playfield.cursor.sprite.visible = true
