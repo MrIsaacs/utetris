@@ -8,8 +8,6 @@ class window.Component.Playfield
   unit       : null
   rows       : null
   cols       : null
-  blocks     : null
-  newline    : null
   combo      : null
   chain      : null
   cursor     : null
@@ -77,7 +75,7 @@ class window.Component.Playfield
     if data
       @fill_panels @stack, data
     else
-      @fill_panels @stack, 4, 'unique'
+      @fill_panels @stack, 5, 'unique'
   push:=>
     if @is_danger(0)
       @game_over()

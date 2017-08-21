@@ -1,7 +1,7 @@
 class controller
   constructor:->
     @playfield1 = new Component.Playfield(1)
-    #@playfield2 = new Component.Playfield(2)
+    @playfield2 = new Component.Playfield(2)
   create_bg:=>
     @bg = game.add.sprite 0,0, 'playfield_vs_bg'
   create_frame:(offset)=>
@@ -16,11 +16,11 @@ class controller
 
     offset = 89
     @create_bg()
-    @playfield1.create @, push: true, x: offset+8, y: 8 + 16
-    #@playfield2.create @, push: true, x: offset+152, y: 8
+    @playfield1.create @, push: true, x: offset+8  , y: 24
+    @playfield2.create @, push: true, x: offset+152, y: 24
     @create_frame(offset)
     @playfield1.create_after()
-    #@playfield2.create_after()
+    @playfield2.create_after()
   tick_danger:(is_danger)=>
     if is_danger
       if @danger is false
@@ -34,10 +34,10 @@ class controller
       @danger = false
   update:=>
     @playfield1.tick()
-    #@playfield2.tick()
+    @playfield2.tick()
 
     @playfield1.render()
-    #@playfield2.render()
+    @playfield2.render()
   shutdown:=>
     @msx_stage.stop()
     @msx_stage_critical.stop()

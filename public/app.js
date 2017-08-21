@@ -105220,10 +105220,6 @@ PIXI.TextureSilentFail = true;
 
     Playfield.prototype.cols = null;
 
-    Playfield.prototype.blocks = null;
-
-    Playfield.prototype.newline = null;
-
     Playfield.prototype.combo = null;
 
     Playfield.prototype.chain = null;
@@ -105327,7 +105323,7 @@ PIXI.TextureSilentFail = true;
       if (data) {
         return this.fill_panels(this.stack, data);
       } else {
-        return this.fill_panels(this.stack, 4, 'unique');
+        return this.fill_panels(this.stack, 5, 'unique');
       }
     };
 
@@ -106592,6 +106588,7 @@ PIXI.TextureSilentFail = true;
       this.create_frame = bind(this.create_frame, this);
       this.create_bg = bind(this.create_bg, this);
       this.playfield1 = new Component.Playfield(1);
+      this.playfield2 = new Component.Playfield(2);
     }
 
     controller.prototype.create_bg = function() {
@@ -106614,10 +106611,16 @@ PIXI.TextureSilentFail = true;
       this.playfield1.create(this, {
         push: true,
         x: offset + 8,
-        y: 8 + 16
+        y: 24
+      });
+      this.playfield2.create(this, {
+        push: true,
+        x: offset + 152,
+        y: 24
       });
       this.create_frame(offset);
-      return this.playfield1.create_after();
+      this.playfield1.create_after();
+      return this.playfield2.create_after();
     };
 
     controller.prototype.tick_danger = function(is_danger) {
@@ -106638,7 +106641,9 @@ PIXI.TextureSilentFail = true;
 
     controller.prototype.update = function() {
       this.playfield1.tick();
-      return this.playfield1.render();
+      this.playfield2.tick();
+      this.playfield1.render();
+      return this.playfield2.render();
     };
 
     controller.prototype.shutdown = function() {
