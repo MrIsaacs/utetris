@@ -158,6 +158,7 @@ class window.Component.Playfield
   # combo is the amount of blocks participating in the combo
   # chain is whether a chain is currently happening.
   update_chain_and_combo:=>
+    #@track_tick()
     combo = 0
     chain = false
     @panels_clearing = []
@@ -167,6 +168,7 @@ class window.Component.Playfield
       chain  = true if cnc[1]
     for panel,i in @panels_clearing
       panel.popping i
+    #console.log 'chain_over_check', chain, @chain, @chain_over()
     @chain = 0 if @chain && @chain_over()
     [combo, chain]
   # Swaps two blocks at location (x,y) and (x+1,y) if swapping is possible
