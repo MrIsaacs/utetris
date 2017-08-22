@@ -1,4 +1,4 @@
-class window.Component.Panel
+class controller
   playfield         : null
   x                 : null
   y                 : null
@@ -321,3 +321,8 @@ class window.Component.Panel
     @x = x
     @y = y
 
+
+if exports?
+  exports.Panel = controller
+else
+  window.Component.Panel = controller
