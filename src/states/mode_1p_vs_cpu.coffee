@@ -57,6 +57,15 @@ class controller
         @msx_stage.stop()
         @msx_stage_critical.stop()
         @msx_stage_results.play()
+  pause:(pi)=>
+    console.log 'stage pause', pi
+    @stage_music 'pause'
+    @playfield1.pause(pi)
+    @playfield2.pause(pi)
+  resume:=>
+    @stage_music 'resume'
+    @playfield1.resume()
+    @playfield2.resume()
   game_over:=>
     @stage_music 'results'
     @playfield1.game_over()

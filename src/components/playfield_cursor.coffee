@@ -31,7 +31,7 @@ class window.Component.PlayfieldCursor
       b    : @swap
       start: @pause
   pause:=>
-    @playfield.pause()
+    @playfield.stage.pause(@playfield.pi)
   up:=>
     @sfx_select.play()
     @y-- if @y > 0

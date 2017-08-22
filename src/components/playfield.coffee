@@ -101,12 +101,10 @@ class window.Component.Playfield
     return unless @should_push
     @newline = @new_panels 1, mode
     @fill_panels true, @newline, 1, mode
-  pause:=>
-    @stage.stage_music 'pause'
-    @menu_pause.pause()
+  pause:(pi)=>
+    @menu_pause.pause(pi)
     @running = false
-  unpause:=>
-    @stage.stage_music 'resume'
+  resume:=>
     @running = true
     @cursor.map_controls()
   game_over:=>

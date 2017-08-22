@@ -105123,7 +105123,7 @@ PIXI.TextureSilentFail = true;
     MenuPause.prototype.create = function(playfield) {
       this.playfield = playfield;
       this.paused = false;
-      this.sprite = game.add.sprite(101, 100, 'menu_pause');
+      this.sprite = game.add.sprite(this.playfield.x + 4, 100, 'menu_pause');
       this.sprite.visible = false;
       return this.cursor.create(this, 8, 8, [this.contiune, this.cancel]);
     };
@@ -105136,13 +105136,17 @@ PIXI.TextureSilentFail = true;
     MenuPause.prototype.contiune = function() {
       this.paused = false;
       this.sprite.visible = false;
-      return this.playfield.unpause();
+      return this.playfield.stage.resume(this.playfield.pi);
     };
 
-    MenuPause.prototype.pause = function() {
+    MenuPause.prototype.pause = function(pi) {
       this.paused = true;
-      this.sprite.visible = true;
-      return this.cursor.map_controls();
+      if (this.playfield.pi === pi) {
+        this.sprite.visible = true;
+        return this.cursor.map_controls();
+      } else {
+        return _d.controls.map(this.playfield.pi, {});
+      }
     };
 
     MenuPause.prototype.update = function() {
@@ -105261,8 +105265,8 @@ PIXI.TextureSilentFail = true;
 
     Playfield.prototype.land = false;
 
-    function Playfield(pi) {
-      this.pi = pi;
+    function Playfield(pi1) {
+      this.pi = pi1;
       this.shutdown = bind(this.shutdown, this);
       this.panel_i = bind(this.panel_i, this);
       this.update_newline = bind(this.update_newline, this);
@@ -105280,7 +105284,7 @@ PIXI.TextureSilentFail = true;
       this.fill_panels = bind(this.fill_panels, this);
       this.new_panels = bind(this.new_panels, this);
       this.game_over = bind(this.game_over, this);
-      this.unpause = bind(this.unpause, this);
+      this.resume = bind(this.resume, this);
       this.pause = bind(this.pause, this);
       this.create_newline = bind(this.create_newline, this);
       this.push = bind(this.push, this);
@@ -105390,14 +105394,12 @@ PIXI.TextureSilentFail = true;
       return this.fill_panels(true, this.newline, 1, mode);
     };
 
-    Playfield.prototype.pause = function() {
-      this.stage.stage_music('pause');
-      this.menu_pause.pause();
+    Playfield.prototype.pause = function(pi) {
+      this.menu_pause.pause(pi);
       return this.running = false;
     };
 
-    Playfield.prototype.unpause = function() {
-      this.stage.stage_music('resume');
+    Playfield.prototype.resume = function() {
       this.running = true;
       return this.cursor.map_controls();
     };
@@ -105795,7 +105797,7 @@ PIXI.TextureSilentFail = true;
     };
 
     PlayfieldCursor.prototype.pause = function() {
-      return this.playfield.pause();
+      return this.playfield.stage.pause(this.playfield.pi);
     };
 
     PlayfieldCursor.prototype.up = function() {
@@ -106687,6 +106689,8 @@ PIXI.TextureSilentFail = true;
       this.update = bind(this.update, this);
       this.danger_check = bind(this.danger_check, this);
       this.game_over = bind(this.game_over, this);
+      this.resume = bind(this.resume, this);
+      this.pause = bind(this.pause, this);
       this.stage_music = bind(this.stage_music, this);
       this.create = bind(this.create, this);
       this.create_frame = bind(this.create_frame, this);
@@ -106777,6 +106781,19 @@ PIXI.TextureSilentFail = true;
           this.msx_stage_critical.stop();
           return this.msx_stage_results.play();
       }
+    };
+
+    controller.prototype.pause = function(pi) {
+      console.log('stage pause', pi);
+      this.stage_music('pause');
+      this.playfield1.pause(pi);
+      return this.playfield2.pause(pi);
+    };
+
+    controller.prototype.resume = function() {
+      this.stage_music('resume');
+      this.playfield1.resume();
+      return this.playfield2.resume();
     };
 
     controller.prototype.game_over = function() {
