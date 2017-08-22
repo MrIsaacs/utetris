@@ -105045,6 +105045,7 @@ PIXI.TextureSilentFail = true;
       this.x = x;
       this.y = y;
       this.menu_items = menu_items;
+      this.sfx_confirm = game.add.audio('sfx_confirm');
       this.sfx_select = game.add.audio('sfx_select');
       this.counter = 0;
       this.index = 0;
@@ -105083,6 +105084,7 @@ PIXI.TextureSilentFail = true;
     };
 
     MenuCursor.prototype.confirm = function() {
+      this.sfx_confirm.play();
       return this.menu_items[this.index]();
     };
 
@@ -105174,6 +105176,7 @@ PIXI.TextureSilentFail = true;
       this.x = x;
       this.y = y;
       this.menu_items = menu_items;
+      this.sfx_confirm = game.add.audio('sfx_confirm');
       this.sfx_select = game.add.audio('sfx_select');
       this.index = 0;
       this.sprite = game.make.sprite(this.x, this.y + (this.index * UNIT), 'menu_pause_cursor');
@@ -105190,6 +105193,7 @@ PIXI.TextureSilentFail = true;
     };
 
     MenuPauseCursor.prototype.confirm = function() {
+      this.sfx_confirm.play();
       return this.menu_items[this.index]();
     };
 
@@ -105387,11 +105391,13 @@ PIXI.TextureSilentFail = true;
     };
 
     Playfield.prototype.pause = function() {
+      this.stage.stage_music('pause');
       this.menu_pause.pause();
       return this.running = false;
     };
 
     Playfield.prototype.unpause = function() {
+      this.stage.stage_music('resume');
       this.running = true;
       return this.cursor.map_controls();
     };
@@ -106525,6 +106531,7 @@ PIXI.TextureSilentFail = true;
       game.load.audio('msx_stage', './msx_stage.mp3');
       game.load.audio('msx_stage_critical', './msx_stage_critical.mp3');
       game.load.audio('msx_stage_results', './msx_stage_results.mp3');
+      game.load.audio('sfx_confirm', './sfx_confirm.mp3');
       game.load.audio('sfx_select', './sfx_select.mp3');
       game.load.audio('sfx_swap', './sfx_swap.mp3');
       game.load.audio('sfx_countdown_blip', './sfx_countdown_blip.mp3');
@@ -106724,6 +106731,22 @@ PIXI.TextureSilentFail = true;
 
     controller.prototype.stage_music = function(state) {
       switch (state) {
+        case 'pause':
+          switch (this.state_music) {
+            case 'active':
+              return this.msx_stage.pause();
+            case 'danger':
+              return this.msx_stage_critical.pause();
+          }
+          break;
+        case 'resume':
+          switch (this.state_music) {
+            case 'active':
+              return this.msx_stage.resume();
+            case 'danger':
+              return this.msx_stage_critical.resume();
+          }
+          break;
         case 'none':
           this.state_music = state;
           this.msx_stage.stop();
@@ -106788,9 +106811,7 @@ PIXI.TextureSilentFail = true;
     };
 
     controller.prototype.shutdown = function() {
-      this.stage_music('stop');
-      this.msx_stage_critical.stop();
-      this.msx_stage_results.stop();
+      this.stage_music('none');
       return this.playfield1.shutdown();
     };
 

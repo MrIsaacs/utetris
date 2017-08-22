@@ -102,9 +102,11 @@ class window.Component.Playfield
     @newline = @new_panels 1, mode
     @fill_panels true, @newline, 1, mode
   pause:=>
+    @stage.stage_music 'pause'
     @menu_pause.pause()
     @running = false
   unpause:=>
+    @stage.stage_music 'resume'
     @running = true
     @cursor.map_controls()
   game_over:=>

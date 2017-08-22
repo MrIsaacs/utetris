@@ -26,6 +26,14 @@ class controller
     @playfield2.create_after()
   stage_music:(state)=>
     switch state
+      when 'pause'
+        switch @state_music
+          when 'active' then @msx_stage.pause()
+          when 'danger' then @msx_stage_critical.pause()
+      when 'resume'
+        switch @state_music
+          when 'active' then @msx_stage.resume()
+          when 'danger' then @msx_stage_critical.resume()
       when 'none'
         @state_music = state
         @msx_stage.stop()
@@ -74,9 +82,7 @@ class controller
     @playfield1.render()
     @playfield2.render()
   shutdown:=>
-    @stage_music 'stop'
-    @msx_stage_critical.stop()
-    @msx_stage_results.stop()
+    @stage_music 'none'
     @playfield1.shutdown()
 ctrl = new controller()
 _states.mode_1p_vs_cpu =

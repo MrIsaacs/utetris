@@ -1,6 +1,7 @@
 class window.Component.MenuCursor
   create:(@menu,@x,@y,@menu_items)=>
-    @sfx_select = game.add.audio 'sfx_select'
+    @sfx_confirm = game.add.audio 'sfx_confirm'
+    @sfx_select  = game.add.audio 'sfx_select'
 
     @counter = 0
     @index  = 0
@@ -29,6 +30,7 @@ class window.Component.MenuCursor
       @sprite.visible = true
       @index++
   confirm:=>
+    @sfx_confirm.play()
     @menu_items[@index]()
   cancel:=>
     console.log 'cancel'

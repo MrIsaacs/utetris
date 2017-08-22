@@ -1,6 +1,7 @@
 class window.Component.MenuPauseCursor
   create:(@menu,@x,@y,@menu_items)=>
-    @sfx_select = game.add.audio 'sfx_select'
+    @sfx_confirm = game.add.audio 'sfx_confirm'
+    @sfx_select  = game.add.audio 'sfx_select'
 
     @index  = 0
     @sprite = game.make.sprite @x, @y+(@index*UNIT), 'menu_pause_cursor'
@@ -12,6 +13,7 @@ class window.Component.MenuPauseCursor
       a    : @confirm
       start: @confirm
   confirm:=>
+    @sfx_confirm.play()
     @menu_items[@index]()
   up:=>
     unless @index is 0

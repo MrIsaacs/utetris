@@ -47,6 +47,7 @@ class controller
     game.load.audio 'msx_stage_critical', './msx_stage_critical.mp3'
     game.load.audio 'msx_stage_results' , './msx_stage_results.mp3'
     # SFX ----------
+    game.load.audio 'sfx_confirm', './sfx_confirm.mp3'
     game.load.audio 'sfx_select' , './sfx_select.mp3'
     game.load.audio 'sfx_swap'   , './sfx_swap.mp3'
 
