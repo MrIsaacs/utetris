@@ -7,7 +7,7 @@ class window.Component.Panel
   under             : null
   left              : null
   right             : null
-  counter           : 0
+  counter           : 0 #counter ie exclusivly used to count down time until clear.
   animation_state   : null
   animation_counter : 0
   chain             : null
@@ -36,15 +36,17 @@ class window.Component.Panel
     @left              = this
     @right             = this
     @state             = STATIC
-    @counter           = 0
+    #@counter           = 0
+    @set_counter 0
     @animation_state   = null
     @animation_counter = 0
-
-  # if stops other panels from falling.
+  is_swappable:=>  @above.state != HANG and @counter is 0
   is_support:=>   @state != FALL and (@i != null or @playfield.blank is @)
-  is_clearable:=> @is_swappable() and @under.is_support() and @i != null
-  is_comboable:=> @is_clearable() or @state is CLEAR and @counter is CLEARBLINKTIME
-  is_empty:=>     @counter is 0 and @i is null and @ != @playfield.blank
+  is_clearable:=>  @is_swappable() and @under.is_support() and @i != null
+  is_comboable:=>  @is_clearable() or @state is CLEAR and @clearing
+  is_empty:=>      @counter is 0 and @i is null and @ != @playfield.blank
+  set_counter:(v)=>
+    @counter = v
   matched:(i)=>
     pos = _f.xy_2_i @x, @y
 
@@ -64,13 +66,11 @@ class window.Component.Panel
     (under is i && under2 is i) ||
     (left  is i && left2  is i) ||
     (right is i && right2 is i)
-  # Whether this block can be swapped or not.
-  # Blocks can be swapped as long as no counter is running.
-  # Blocks cannot be swapped underneath a block about to fall from hang
-  is_swappable:=>
-    return false if @above.state is HANG
-    @counter is 0
 
+  frames:(arr)=>
+    frames = []
+    frames.push @frame(f) for f in arr
+    frames
   frame:(i)=>
     (@i * 8) + i
   play_land:=>    @sprite.animations.play 'land' , game.time.desiredFps, false
@@ -78,20 +78,16 @@ class window.Component.Panel
   play_live:=>    @sprite.animations.play 'live'
   play_dead:=>    @sprite.animations.play 'dead'
   play_danger:=>  @sprite.animations.play 'danger', game.time.desiredFps/3, true
-  play_newline:=>    
-    console.log 'play newline'
-    @sprite.animations.play 'newline'
+  play_newline:=> @sprite.animations.play 'newline'
+  
   set_animation:=>
     @sprite.frame = @frame(0)
-    @sprite.animations.add 'land'  , [@frame(4),@frame(2),@frame(3),@frame(0)]
-    @sprite.animations.add 'clear' , [@frame(6),@frame(0),@frame(6),@frame(0),
-                                      @frame(6),@frame(0),@frame(6),@frame(0),
-                                      @frame(6),@frame(0),@frame(6),@frame(0),
-                                      @frame(6),@frame(0),@frame(5)]
-    @sprite.animations.add 'live'  , [@frame(0)]
-    @sprite.animations.add 'danger', [@frame(0),@frame(4),@frame(0),@frame(3),@frame(2),@frame(3)]
-    @sprite.animations.add 'dead'  , [@frame(5)]
-    @sprite.animations.add 'newline', [@frame(1)]
+    @sprite.animations.add 'land'   , @frames(FRAME_LAND)
+    @sprite.animations.add 'clear'  , @frames(FRAME_CLEAR)
+    @sprite.animations.add 'live'   , @frames(FRAME_LIVE)
+    @sprite.animations.add 'danger' , @frames(FRAME_DANGER)
+    @sprite.animations.add 'dead'   , @frames(FRAME_DEAD)
+    @sprite.animations.add 'newline', @frames(FRAME_NEWLINE)
   set:(i)=>
     switch i
       when 'unique'
@@ -108,10 +104,18 @@ class window.Component.Panel
   # states of its neighbors.
   # Will keep its current state it its counter is still running.
   # Block behaviour should be described in the wiki
-  update_state:=>
+  update_state:(i)=>
     return if @i is null
     return if @newline
+    if @counter_popping > 0
+      @counter_popping--
+    else if @counter_popping is 0
+      @counter_popping = null
+      @sprite.visible = false
+
     if @counter > 0
+      #if @x is 2 && @y is 9
+        #console.log "counter--", i
       @counter--
       return if @counter > 0
     ### Run through the state switch to determine behaviour ###
@@ -125,27 +129,28 @@ class window.Component.Panel
           @state = STATIC
           @chain = false
         else if @under.state is HANG
-          #console.log 'H', @x, @y
           @state   = HANG
-          @counter = @under.counter
+          #@counter = @under.counter
+          @set_counter @under.counter
           @chain   = @under.chain
         else if @under.is_empty()
           @state   = HANG
-          @counter = HANGTIME
+          #@counter = HANGTIME
+          @set_counter HANGTIME
         else
           @chain = false
       when HANG
         @state = FALL
       when FALL
-        #console.log 'FALLING', @x, @y
         if @under.is_empty()
           @fall()
         else if @under.state is CLEAR
           @state = STATIC
         else
           @state   = @under.state
-          @counter = @under.counter
-          @chain   = true if @under.chain
+          #@counter = @under.counter
+          @set_counter @under.counter
+          @chain   = @under.chain
         if (@state is STATIC or @state is SWAP) and @sprite
           @play_land()
           @playfield.land = true
@@ -154,6 +159,8 @@ class window.Component.Panel
       else
         console.log "Unknown block state"
     return
+
+
 
   # Set the block sprite to the correct rendering location,
   # keeping animations and offsets in mind.
@@ -171,27 +178,28 @@ class window.Component.Panel
       @animation_counter--    if @animation_counter > 0
       switch @animation_state
         when ANIM_SWAP_LEFT
-          step = UNIT / ANIM_SWAPTIME
+          step = UNIT / TIME_SWAP
           @sprite.x += step * @animation_counter
         when ANIM_SWAP_RIGHT
           @sprite.x -= step * @animation_counter
-        #when ANIM_CLEAR, ANIM_LAND
   # This block will give its state and sprite to the block under it and then
   # reset to an empty block.
   fall:=>
     @under.state   = @state
-    @under.counter = @counter
+    #@under.counter = @counter
+    @under.set_counter @counter
+    @under.chain   = @chain
     @under.i       = @i
     @under.set_animation()
     @under.sprite.frame   = @sprite.frame
-    @under.chain          = @chain
     @under.sprite.visible = true
 
+    @state          = STATIC
+    #@counter        = 0
+    @set_counter 0
+    @chain          = false
     @i              = null
     @sprite.visible = false
-    @state          = STATIC
-    @counter        = 0
-    @chain          = false
   # Swap this block with its right neighbour.
   swap:=>
     #swap i
@@ -220,38 +228,45 @@ class window.Component.Panel
 
     if @i is null
       @state   = SWAP
-      @counter = 0
+      #@counter = 0
+      @set_counter 0
     else
       @state             = SWAP
-      @counter           = SWAPTIME
+      @set_counter TIME_SWAP
       @animation_state   = ANIM_SWAP_LEFT
-      @animation_counter = ANIM_SWAPTIME
+      @animation_counter = TIME_SWAP
 
     if @right.i is null
       @right.state   = SWAP
-      @right.counter = 0
+      #@right.counter = 0
+      @right.set_counter 0
     else
       @right.state             = SWAP
-      @right.counter           = SWAPTIME
+      @right.set_counter TIME_SWAP
       @right.animation_state   = ANIM_SWAP_RIGHT
-      @right.animation_counter = ANIM_SWAPTIME
+      @right.animation_counter = TIME_SWAP
   # Erase the contents of this block and start a chain in
   # its upper neighbour.
   erase:=>
     @i              = null
     @sprite.visible = false
     @state          = STATIC
-    @counter        = 0
+    #@counter        = 0
+    @set_counter 0
     @chain          = false
     @above.chain    = true if @above && @above.i != null
-  # Sets this blocks state to CLEAR.
-  # returns [combo, chain] where
-  # combo is an int represeting the nr of blocks that are set to clear.
-  # chain is a boolean telling if this block is part of a chain.
+  popping:(i)=>
+    time = TIME_CLEAR + (TIME_POP*@playfield.panels_clearing.length) + TIME_FALL
+    #@counter  = time
+    @set_counter time
+    @clearing = false
+    @counter_popping = TIME_CLEAR + (TIME_POP*(i+1))
+    #@playfield.track_tick()
   clear:=>
     return [0, @chain] if @state is CLEAR
-    @counter = CLEARBLINKTIME
-    @state   = CLEAR
+    @clearing = true
+    @state    = CLEAR
+    @playfield.panels_clearing.push @
     @play_clear()
     [1, @chain]
   nocombo:=>
@@ -268,12 +283,12 @@ class window.Component.Panel
   check_neighbours:(p1,p2,combo,chain)=>
     return [combo,chain] unless p1.is_comboable() && p1.i is @i  &&
                                 p2.is_comboable() && p2.i is @i
-    middle  = @clear()
     panel1  = p1.clear()
+    middle  = @clear()
     panel2  = p2.clear()
 
-    combo  += middle[0]
     combo  += panel1[0]
+    combo  += middle[0]
     combo  += panel2[0]
     chain   = true if middle[1] or panel1[1] or panel2[1]
     [combo,chain]
@@ -283,6 +298,11 @@ class window.Component.Panel
       @play_dead()
     else
       @play_live()
+  update_neighbours:(i)=>
+    @left  = if ((i+1) % COLS) is 1  then @playfield.blank else @playfield.stack[i-1]
+    @right = if ((i+1) % COLS) is 0  then @playfield.blank else @playfield.stack[i+1]
+    @under = if i+1 >= (PANELS-COLS) then @playfield.blank else @playfield.stack[i+COLS]
+    @above = if i+1 <= COLS          then @playfield.blank else @playfield.stack[i-COLS]
   update:(i,is_danger)=>
     return unless @playfield.running
     [x,y] = _f.i_2_xy(i)
@@ -295,12 +315,9 @@ class window.Component.Panel
         @play_live()
       @danger = false
 
-    @left  = if ((i+1) % COLS) is 1  then @playfield.blank else @playfield.stack[i-1]
-    @right = if ((i+1) % COLS) is 0  then @playfield.blank else @playfield.stack[i+1]
-    @under = if i+1 >= (PANELS-COLS) then @playfield.blank else @playfield.stack[i+COLS]
-    @above = if i+1 <= COLS          then @playfield.blank else @playfield.stack[i-COLS]
+    @update_neighbours(i)
 
-    @update_state()
+    @update_state(i)
     @x = x
     @y = y
 

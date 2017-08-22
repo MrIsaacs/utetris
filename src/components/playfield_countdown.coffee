@@ -40,5 +40,5 @@ class window.Component.PlayfieldCountdown
         @playfield.cursor.state = 'active'
         @playfield.cursor.sprite.visible = true
         @playfield.running = true
-        @playfield.stage.msx_stage.play()
+        @playfield.stage.stage_music 'active'
         @state = null

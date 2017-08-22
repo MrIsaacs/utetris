@@ -1,22 +1,19 @@
 class controller
   constructor:->
-    @playfield = new Component.Playfield()
+    @playfield = new Component.Playfield(1)
   create:=>
-    game.stage.backgroundColor = 0x000000
-
-    unit  = (game.stage.height / (WIN_HEIGHT/UNIT))
-    scale = unit / UNIT
-
-    x = (game.stage.width / 2) - ((scale * UNIT) /2)
-    console.log 'puzzle', _d.puzzles.skill_chain_demo_2.demo_4
-    @playfield.create
+    game.stage.backgroundColor = 0xFFFFFF
+    @playfield.create @,
       push  : false
-      x     : (scale * 8) + x
-      y     : scale * 8
-      panels: _d.puzzles.skill_chain_demo_2.demo_4
+      x     : 40
+      y     : 8
+      panels: _d.puzzles.test
+
+    @playfield.create_after()
   update:=>
-    @playfield.tick()
+    @playfield.update()
     @playfield.render()
+  stage_music:(state)=>
 
 ctrl = new controller()
 _states.mode_puzzle =

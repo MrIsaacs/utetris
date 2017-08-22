@@ -4,6 +4,17 @@ class window.Core.Data
     minor: 3
     patch: 2
   puzzles:
+    test: [
+      null, null, 2, null, null, null,
+      null, null, 2, null, null, null,
+      null, null, 3, null, null, null,
+      null, null, 3, null, null, null,
+      null, null, 1, null, null, null,
+      null, null, 1, null, null, null,
+      null, null, 1, null, null, null,
+      null, null, 3, null, null, null,
+      null, null, 2, null, null, null
+    ]
     skill_chain_demo_2:
       demo_4: [
         null, null, 5, 2, 2, null,

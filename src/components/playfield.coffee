@@ -27,14 +27,12 @@ class window.Component.Playfield
     @blank      = new Component.Panel()
     @ai         = new Component.Ai()
   create:(@stage,opts={})=>
-
     @sfx_swap  = game.add.audio 'sfx_swap'
     @sfx_land = []
     @sfx_land[0]  = game.add.audio 'sfx_drop0'
     @sfx_land[1]  = game.add.audio 'sfx_drop1'
     @sfx_land[2]  = game.add.audio 'sfx_drop2'
     @sfx_land[3]  = game.add.audio 'sfx_drop3'
-
 
     @should_push = opts.push || false
 
@@ -76,6 +74,9 @@ class window.Component.Playfield
       @fill_panels false, @stack, data
     else
       @fill_panels false, @stack, 5, 'unique'
+    for panel,i in @stack
+      panel.update_neighbours(i)
+
   push:=>
     if @is_danger(0)
       @stage.game_over()
@@ -150,8 +151,8 @@ class window.Component.Playfield
           stack[i].newline = true
           stack[i].play_newline()
   update_panels:=>
-    for panel,i in @stack
-      panel.update i, @is_danger(1)
+    for i in SCAN_BTLR
+      @stack[i].update i, @is_danger(1)
   # Update the combos and chain for the entire grid.
   # Returns [combo, chain] where
   # combo is the amount of blocks participating in the combo
@@ -159,12 +160,15 @@ class window.Component.Playfield
   update_chain_and_combo:=>
     combo = 0
     chain = false
+    @panels_clearing = []
     for panel,i in @stack
-      cnc = panel.chain_and_combo()
+      cnc    = panel.chain_and_combo()
       combo += cnc[0]
-      chain = true if cnc[1]
+      chain  = true if cnc[1]
+    for panel,i in @panels_clearing
+      panel.popping i
+    @chain = 0 if @chain && @chain_over()
     [combo, chain]
-  
   # Swaps two blocks at location (x,y) and (x+1,y) if swapping is possible
   swap:(x, y)=>
     i = _f.xy_2_i x, y
@@ -172,7 +176,7 @@ class window.Component.Playfield
       @stack[i].swap()
   # Checks if the current chain is over.
   # returns a boolean
-  chainOver:=>
+  chain_over:=>
     chain = true
     for panel in @stack
       chain = false if panel.chain
@@ -199,18 +203,23 @@ class window.Component.Playfield
     if @pushCounter <= 0
       @pushCounter = @pushTime
       @score      += @push()
+  track_tick:=>
+    @tick = 0 unless @tick >= 0
+  print_tick:(with_time=false)=>
+    if @tick >= 0
+      if with_time
+        console.log "~ #{@tick} #{Date.now()}"
+      else
+        console.log "~ #{@tick}"
+      @tick++
   update:=>
     return unless @running
+    @print_tick()
     @tick_push() if @should_push
     @update_panels()
     @ai.update() if @has_ai
     # combo n chain
     cnc = @update_chain_and_combo()
-    if @chain
-      if @chainOver()
-        #console.log 'chain over'
-        @chain = 0
-
     @score_current cnc
     @render()
     return
@@ -245,15 +254,15 @@ class window.Component.Playfield
         0
   score_current:(cnc)=>
     if cnc[0] > 0
-      #console.log 'combo is ', cnc
+      console.log 'combo is ', cnc
       @score += cnc[0] * 10
       @score += @score_combo(cnc[0])
       if cnc[1]
         @chain++
-        #console.log 'chain is ', @chain + 1
+        console.log 'chain is ', @chain + 1
       if @chain
         @score += @score_chain(@chain + 1)
-      #console.log 'Score: ', @score
+      console.log 'Score: ', @score
   update_stack:=>
     for panel in @stack
       panel.render()
