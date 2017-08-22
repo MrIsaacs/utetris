@@ -1,4 +1,4 @@
-require '../src/task'
+{Task} = require '../src/task'
 
 chai = require 'chai'
 chai.should()
